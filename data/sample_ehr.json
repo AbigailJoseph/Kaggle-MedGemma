@@ -1,0 +1,25 @@
+{
+  "demographics": {
+    "age": 67,
+    "sex": "female"
+  },
+  "chief_complaint": "Shortness of breath",
+  "symptoms": [
+    "dyspnea",
+    "fatigue",
+    "leg swelling"
+  ],
+  "vitals": {
+    "heart_rate": 105,
+    "blood_pressure": "140/90",
+    "oxygen_saturation": 91
+  },
+  "labs": {
+    "BNP": "elevated",
+    "troponin": "normal"
+  },
+  "past_medical_history": [
+    "hypertension",
+    "type 2 diabetes"
+  ]
+}

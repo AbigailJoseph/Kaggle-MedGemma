@@ -1,0 +1,11 @@
+Student types free text
+        ↓
+StudentInputParser
+        ↓
+ConversationState updates
+        ↓
+Bayes Net checks plausibility
+        ↓
+AI Attending generates coaching
+
+

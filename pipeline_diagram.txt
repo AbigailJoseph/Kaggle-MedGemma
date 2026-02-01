@@ -1,0 +1,13 @@
+EHR Case
+        ↓
+EHR Parser/Navigator
+        ↓
+Extracted clinical facts
+        ↓
+Bayesian Network Population
+        ↓
+Student clinical reasoning (symptoms + diagnosis)
+        ↓
+Bayes Net plausibility check
+        ↓
+AI Attending feedback grounded in Bayes Net
