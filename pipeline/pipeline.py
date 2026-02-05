@@ -6,7 +6,8 @@ from evaluation.diagnosis_evaluator import DiagnosisEvaluator
 from agents.ai_attending import AIAttending
 from pipeline.state import ConversationState
 from models.medgemma_client import MedGemmaClient
-
+from agents.medical_student import MedicalStudentAgent
+from models.openai_client import OpenAIClient
 
 class ClinicalTutoringPipeline:
     def __init__(self):
@@ -19,9 +20,13 @@ class ClinicalTutoringPipeline:
         self.parser = StudentInputParser()
         self.diagnosis_eval = DiagnosisEvaluator()
 
-        # NEW: MedGemma client + attending
-        self.llm = MedGemmaClient()
-        self.attending = AIAttending(self.llm)
+        # Attending (MedGemma)
+        self.attending_llm = MedGemmaClient()
+        self.attending = AIAttending(self.attending_llm)
+
+        # Medical student (OpenAI)
+        self.student_llm = OpenAIClient()
+        self.student = MedicalStudentAgent(self.student_llm)
 
         self.ehr_data = ehr_data
         self.findings = findings
