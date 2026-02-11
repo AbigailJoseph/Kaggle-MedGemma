@@ -1,10 +1,20 @@
 from ehr.ehr_reader import EHRReader
 from ehr.ehr_navigator import EHRNavigator
-from models.bayes_builder import BayesNetBuilder
+from bayes.noisy_or_bayesnet import NoisyORBayesNet
+from bayes.network_data import PULMONARY_NETWORK_DATA
 from parsing.student_parser import StudentInputParser
 from evaluation.diagnosis_evaluator import DiagnosisEvaluator
 from agents.ai_attending import AIAttending
 from pipeline.state import ConversationState
+
+# Map EHR finding strings → Bayes net symptom keys
+FINDING_TO_SYMPTOM = {
+    "fever": "Fever",
+    "cough": "Crackles",
+    "shortness of breath": "Progressive_Dyspnea",
+    "hypoxia": "Hypoxemia",
+    "chest pain": "Chest_Pain",
+}
 
 class ClinicalTutoringPipeline:
     def __init__(self):
@@ -12,8 +22,11 @@ class ClinicalTutoringPipeline:
         ehr_data = EHRReader().load_case()
         findings = EHRNavigator().extract_findings(ehr_data)
 
-        # 2. Build Bayes Net from EHR
-        self.bayes_net = BayesNetBuilder().build_from_findings(findings)
+        # 2. Build Bayes Net and set evidence from EHR
+        self.bayes_net = NoisyORBayesNet(PULMONARY_NETWORK_DATA)
+        evidence = {FINDING_TO_SYMPTOM[f]: True
+                    for f in findings if f in FINDING_TO_SYMPTOM}
+        self.bayes_net.set_evidence(evidence)
 
         # 3. Initialize tutoring components
         self.state = ConversationState()

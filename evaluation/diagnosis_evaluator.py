@@ -1,3 +1,13 @@
 class DiagnosisEvaluator:
+    # Map student diagnosis strings → Bayes net disease keys
+    DIAGNOSIS_TO_DISEASE = {
+        "pneumonia": "Pneumonia",
+        "heart_failure": "LV_Decomp",
+        "pulmonary_embolism": "PE",
+    }
+
     def is_supported(self, bayes_net, diagnosis: str) -> bool:
-        return bayes_net.probability_of(diagnosis) >= 0.3
+        disease = self.DIAGNOSIS_TO_DISEASE.get(diagnosis)
+        if disease is None:
+            return False
+        return bayes_net.query_disease(disease) >= 0.3
