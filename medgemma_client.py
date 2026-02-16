@@ -2,10 +2,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-
 from google.cloud import aiplatform
 
-# Configuration - Replace these with your actual details
+# Configuration
 PROJECT_ID = os.getenv("MEDGEMMA_PROJECT_ID")
 LOCATION = "us-central1"
 ENDPOINT_ID = os.getenv("MEDGEMMA_ENDPOINT_ID")
@@ -17,24 +16,34 @@ def query_medgemma(prompt):
     # Reference the existing endpoint
     endpoint = aiplatform.Endpoint(ENDPOINT_ID)
 
-    # MedGemma expects instances in a specific format
-    # Note: MedGemma 1.5 often uses a "thinking" or "multimodal" format 
-    # depending on the specific variant (2B, 7B, 27B)
+    # MedGemma 1.5 4B-IT (vLLM) expects 'prompt'
     instance = {
-        "content": prompt,
+        "prompt": prompt,
     }
 
-    # Optional: adjust parameters like temperature or max output tokens
+    # vLLM-compatible parameters
     parameters = {
         "temperature": 0.2,
-        "max_output_tokens": 1024,
+        "max_tokens": 1024,
+        "top_p": 0.95,
     }
 
-    response = endpoint.predict(instances=[instance], parameters=parameters)
-    
-    for prediction in response.predictions:
-        print(f"MedGemma Response: {prediction}")
+    try:
+        response = endpoint.predict(instances=[instance], parameters=parameters)
+        
+        # Extracting the text from the vLLM response format
+        for prediction in response.predictions:
+            # vLLM usually returns a string or a dict with 'text' or 'generated_text'
+            if isinstance(prediction, dict) and "text" in prediction:
+                print(f"MedGemma Response: {prediction['text']}")
+            else:
+                # If it's a raw string, print it directly
+                print(f"MedGemma Response: {prediction}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    user_prompt = "What are the common symptoms of Type 2 Diabetes?"
+    # Instruction-tuned models work best with clear "Question/Answer" formats
+    user_prompt = "Question: What are the common symptoms of Type 2 Diabetes?\nAnswer:"
     query_medgemma(user_prompt)
