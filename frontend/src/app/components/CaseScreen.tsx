@@ -45,8 +45,8 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                   <User className="w-5 h-5 text-[--navy]" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Patient: J.M. (62-year-old male)</h3>
-                  <p className="text-sm text-muted-foreground">Case #2847</p>
+                  <h3 className="font-semibold">Patient: 89-year-old male</h3>
+                  <p className="text-sm text-muted-foreground">Case 12-2010</p>
                 </div>
               </div>
 
@@ -56,7 +56,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                     <FileText className="w-4 h-4 text-[--teal]" />
                     <h4 className="font-semibold text-sm">Chief Complaint</h4>
                   </div>
-                  <p className="text-sm ml-6">Chest pain and shortness of breath for 2 hours</p>
+                  <p className="text-sm ml-6">Progressive dyspnea over 6 months, markedly worsened over 3 days</p>
                 </div>
 
                 <div>
@@ -65,9 +65,12 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                     <h4 className="font-semibold text-sm">History of Present Illness</h4>
                   </div>
                   <p className="text-sm ml-6">
-                    Patient reports substernal chest pressure (7/10) radiating to left arm, associated with 
-                    dyspnea and diaphoresis. Symptoms started at rest while watching TV. Denies nausea or 
-                    vomiting. No relief with rest.
+                    Six months of progressive exertional dyspnea (3 blocks → 1 flight → 2–3 steps).
+                    Three days prior: worsening dyspnea, somnolence, decreased appetite and urine output,
+                    unsteady gait. On day of admission found with labored breathing; rales in both lung fields.
+                    EMS administered O₂ (15 L/min) and furosemide with improvement. Denies fever, chills,
+                    night sweats, chest pain, or leg edema. Chronic dry cough unchanged. 2.3 kg weight loss
+                    over prior 2 months.
                   </p>
                 </div>
               </div>
@@ -85,7 +88,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Blood Pressure</p>
-                    <p className="font-semibold">148/92 mmHg</p>
+                    <p className="font-semibold">105/43 mmHg</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -93,8 +96,8 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                     <Heart className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Heart Rate</p>
-                    <p className="font-semibold">102 bpm</p>
+                    <p className="text-xs text-muted-foreground">Heart Rate (paced)</p>
+                    <p className="font-semibold">81 bpm</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -102,8 +105,8 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                     <Thermometer className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Temperature</p>
-                    <p className="font-semibold">37.2°C</p>
+                    <p className="text-xs text-muted-foreground">Temperature / RR</p>
+                    <p className="font-semibold">36.1°C / 28 rpm</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -112,7 +115,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">O2 Saturation</p>
-                    <p className="font-semibold">94% RA</p>
+                    <p className="font-semibold">78% RA → 91% 6L NC</p>
                   </div>
                 </div>
               </div>
@@ -125,29 +128,29 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm">Troponin I</span>
-                  <span className="font-semibold text-sm">0.8 ng/mL</span>
+                  <span className="text-sm">Glucose (fingerstick)</span>
+                  <span className="font-semibold text-sm">230 mg/dL</span>
                   <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">High</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm">BNP</span>
-                  <span className="font-semibold text-sm">450 pg/mL</span>
-                  <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">Elevated</span>
+                  <span className="text-sm">JVP</span>
+                  <span className="font-semibold text-sm">14 cm above RA</span>
+                  <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">Elevated</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm">D-Dimer</span>
-                  <span className="font-semibold text-sm">0.3 mg/L</span>
+                  <span className="text-sm">Troponin (serial)</span>
+                  <span className="font-semibold text-sm">No rise</span>
                   <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Normal</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm">WBC</span>
-                  <span className="font-semibold text-sm">11.2 K/μL</span>
-                  <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded">Elevated</span>
+                  <span className="text-sm">Echo — EF</span>
+                  <span className="font-semibold text-sm">54%</span>
+                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Preserved</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-sm">Creatinine</span>
-                  <span className="font-semibold text-sm">1.1 mg/dL</span>
-                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Normal</span>
+                  <span className="text-sm">Echo — RV</span>
+                  <span className="font-semibold text-sm">Dilated, hypokinetic</span>
+                  <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">Abnormal</span>
                 </div>
               </div>
             </Card>
@@ -157,19 +160,45 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
               <ul className="space-y-2">
                 <li className="flex items-start gap-2 text-sm">
                   <span className="text-[--teal] mt-1">•</span>
-                  <span>Hypertension (controlled on lisinopril)</span>
+                  <span>CAD (stent 10 years ago); complete heart block → dual-lead pacemaker (6 years ago)</span>
                 </li>
                 <li className="flex items-start gap-2 text-sm">
                   <span className="text-[--teal] mt-1">•</span>
-                  <span>Type 2 Diabetes (HbA1c 7.2%)</span>
+                  <span>DM, HTN, hyperlipidemia, cerebrovascular disease</span>
                 </li>
                 <li className="flex items-start gap-2 text-sm">
                   <span className="text-[--teal] mt-1">•</span>
-                  <span>Hyperlipidemia (on atorvastatin)</span>
+                  <span>Retired plumber — occupational asbestos exposure (shipyard)</span>
                 </li>
                 <li className="flex items-start gap-2 text-sm">
                   <span className="text-[--teal] mt-1">•</span>
-                  <span>Former smoker (quit 5 years ago, 20 pack-year history)</span>
+                  <span>150 pack-year smoking history (3 PPD × 50 yrs); quit 14 years ago</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-[--teal] mt-1">•</span>
+                  <span>Brother has heart disease and asbestosis</span>
+                </li>
+              </ul>
+            </Card>
+
+            <Card className="p-6">
+              <h4 className="font-semibold mb-3">Imaging &amp; Studies</h4>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-[--teal] mt-1">•</span>
+                  <span><strong>CXR:</strong> Bilateral patchy air-space opacities, indistinct pulmonary vessels, possible small pleural effusions, calcified pleural plaques on right hemidiaphragm, coarse reticular opacities with cystic lucency at both bases</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-[--teal] mt-1">•</span>
+                  <span><strong>CT chest:</strong> Bilateral cystic changes, septal thickening, bronchial-wall thickening, honeycomb changes, traction bronchiectasis, diffuse asymmetric ground-glass opacification; calcified pericardium and pleura; paratracheal/hilar/subcarinal LAD (1.5–2.3 cm)</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-[--teal] mt-1">•</span>
+                  <span><strong>Echo:</strong> EF 54%, mild concentric LVH; RV markedly dilated and hypokinetic, moderate-to-severe TR, pulmonary arterial hypertension, interventricular septal flattening</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-[--teal] mt-1">•</span>
+                  <span><strong>ECG:</strong> Paced rhythm at 88 bpm, no ectopy</span>
                 </li>
               </ul>
             </Card>
