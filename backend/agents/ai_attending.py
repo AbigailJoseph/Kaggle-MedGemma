@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 try:
     from openai import OpenAI
@@ -16,10 +16,6 @@ Hard rules:
 
 Output format every time (strict):
 - 1-2 sentences: Coaching feedback tied to Bayes + MedGemma.
-- "Evaluation (9 metrics):" 3 bullets:
-   • Top strengths (1-2)
-   • Top gaps (1-2)
-   • Next focus metric
 - End with EXACTLY ONE question (prefer one from EVALUATION_PACKET['questions'] if present).
 """
 
@@ -31,6 +27,8 @@ class AIAttending:
 
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        # Stores interleaved user/assistant turns for conversation continuity
+        self._history: List[Dict[str, str]] = []
 
     def initial_message(self, bayes_summary: Dict[str, Any], medgemma_packet: str) -> str:
         context = self._make_context(bayes_summary, medgemma_packet, student_state={"turn_number": 0})
@@ -64,13 +62,21 @@ STUDENT_STATE:
 """
 
     def _chat(self, context: str, user_message: str) -> str:
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            # Developer block is rebuilt each turn with the latest Bayes/eval state
+            {"role": "developer", "content": context},
+            # Prior conversation turns give the model memory of what was already discussed
+            *self._history,
+            {"role": "user", "content": user_message},
+        ]
         resp = self.client.chat.completions.create(
             model=self.model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "developer", "content": context},
-                {"role": "user", "content": user_message},
-            ],
+            messages=messages,
             temperature=0.3,
         )
-        return resp.choices[0].message.content.strip()
+        reply = resp.choices[0].message.content.strip()
+        # Append this turn to history so it's available on the next call
+        self._history.append({"role": "user", "content": user_message})
+        self._history.append({"role": "assistant", "content": reply})
+        return reply
