@@ -137,6 +137,7 @@ class ClinicalTutoringPipeline:
         One turn: parse student -> update state -> evaluate -> respond.
         """
         parsed = self.parser.parse(student_input)
+        self.state.student_diagnosis = parsed.get("diagnosis")
 
         # Track symptoms across turns
         for s in parsed.get("present", []):
@@ -150,7 +151,7 @@ class ClinicalTutoringPipeline:
         evidence = {s: True for s in self.state.symptoms_identified}
         evidence.update({s: False for s in self.state.symptoms_absent})
         self.bayes_net.set_evidence(evidence)
-        self.state.bayes_summary = self.bayes_net.to_summary(k=5)
+        self.state.bayes_summary = build_bayes_summary(self.bayes_net, evidence, top_k=5)
 
         # Re-query MedGemma with updated differential
         self.state.medgemma_packet = query_medgemma(
