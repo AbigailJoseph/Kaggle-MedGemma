@@ -9,6 +9,7 @@ class ConversationState:
     turn_number: int = 0
 
     symptoms_identified: List[str] = field(default_factory=list)
+    symptoms_absent: List[str] = field(default_factory=list)
     student_diagnosis: Optional[str] = None
 
     # LLM grounding artifacts (computed once per case)
