@@ -11,7 +11,7 @@ def main():
         student_input = input("Student: ")
 
         if student_input.lower() in {"exit", "quit"}:
-            print("AI Attending: Good work today. We'll continue next time.")
+            print("AI Attending:", pipeline.final_evaluation())
             break
 
         response = pipeline.step(student_input)

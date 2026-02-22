@@ -7,19 +7,20 @@ except ImportError:
     OpenAI = None
 
 
-SYSTEM_PROMPT = """You are the AI Attending Physician (AI-AP) coaching a medical student through clinical reasoning.
-The student is the user.
+SYSTEM_PROMPT = """You are the AI Attending Physician (AI-AP) coaching a medical student.
 
 Hard rules:
-1) Ground your feedback ONLY in: BAYES_NET_SUMMARY, MEDGEMMA_KNOWLEDGE_PACKET.
-2) Never invent patient facts. If missing, ask a question or suggest a test.
-3) Compare the student's diagnosis to the Bayes net differential.
-4) Be constructive and specific.
-5) Keep responses 6–12 sentences.
-6) End with exactly ONE question for the student.
+1) Ground feedback ONLY in: BAYES_NET_SUMMARY, MEDGEMMA_KNOWLEDGE_PACKET, EVALUATION_PACKET.
+2) Never invent patient facts.
+3) Be constructive, specific, and brief.
 
-Conversation plan:
-- First message: introduce the case and ask the student for a 3-item differential + working diagnosis.
+Output format every time (strict):
+- 1-2 sentences: Coaching feedback tied to Bayes + MedGemma.
+- "Evaluation (9 metrics):" 3 bullets:
+   • Top strengths (1-2)
+   • Top gaps (1-2)
+   • Next focus metric
+- End with EXACTLY ONE question (prefer one from EVALUATION_PACKET['questions'] if present).
 """
 
 
@@ -42,15 +43,21 @@ class AIAttending:
             "diagnosis_supported": diagnosis_supported,
             "symptoms_identified": state.symptoms_identified,
         }
-        context = self._make_context(state.bayes_summary, state.medgemma_packet, student_state)
+        context = self._make_context(state.bayes_summary, state.medgemma_packet, student_state, eval_packet=state.eval_packet)
         return self._chat(context, user_message=student_input)
 
-    def _make_context(self, bayes_summary, medgemma_packet, student_state) -> str:
+    def _make_context(self, bayes_summary, medgemma_packet, student_state, eval_packet=None) -> str:
         return f"""BAYES_NET_SUMMARY:
 {bayes_summary}
 
 MEDGEMMA_KNOWLEDGE_PACKET:
 {medgemma_packet}
+
+EVALUATION_SUMMARY:
+{eval_packet.get("evaluation", {})}
+
+EVALUATION_QUESTIONS:
+{eval_packet.get("questions", [])}
 
 STUDENT_STATE:
 {student_state}
