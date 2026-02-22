@@ -1,53 +1,49 @@
-# parsing/student_parser.py
+import json
+import os
+from openai import OpenAI
+
+VALID_SYMPTOMS = [
+    "Progressive_Dyspnea", "Crackles", "Hypoxemia", "Tachypnea", "Fever",
+    "Chest_Pain", "Hemoptysis", "Elevated_JVP", "Bilateral_Opacities",
+    "RV_Dysfunction", "Calcified_Plaques", "Pulm_Hypertension", "Altered_Mental_Status",
+]
+
+VALID_DISEASES = [
+    "Asbestosis", "Edema", "Pneumonia", "Hemorrhage", "Fibrosis",
+    "Infection", "LV_Decomp", "COPD", "PE",
+]
+
 
 class StudentInputParser:
     """
-    Extracts symptoms + diagnosis from student free text.
-    Outputs disease names that match bayes/network_data.py (e.g., Pneumonia, Edema, PE).
+    Uses OpenAI to extract symptoms + diagnosis from student free text.
+    Returns names matching bayes/network_data.py.
     """
 
-    DIAG_KEYWORDS = [
-        ("pneumonia", "Pneumonia"),
-        ("pulmonary embolism", "PE"),
-        ("embolism", "PE"),
-        ("pe", "PE"),
-        ("heart failure", "Edema"),
-        ("pulmonary edema", "Edema"),
-        ("edema", "Edema"),
-        ("copd", "COPD"),
-        ("infection", "Infection"),
-        ("fibrosis", "Fibrosis"),
-        ("asbestosis", "Asbestosis"),
-        ("hemorrhage", "Hemorrhage"),
-        ("lv decomp", "LV_Decomp"),
-    ]
-
-    SYMPTOM_KEYWORDS = [
-        ("fever", "Fever"),
-        ("hypoxia", "Hypoxemia"),
-        ("shortness of breath", "Progressive_Dyspnea"),
-        ("dyspnea", "Progressive_Dyspnea"),
-        ("chest pain", "Chest_Pain"),
-        ("tachypnea", "Tachypnea"),
-        ("hemoptysis", "Hemoptysis"),
-        ("crackles", "Crackles"),
-        ("jvp", "Elevated_JVP"),
-        ("altered mental status", "Altered_Mental_Status"),
-        ("confusion", "Altered_Mental_Status"),
-    ]
+    def __init__(self):
+        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     def parse(self, text: str) -> dict:
-        t = (text or "").lower()
-
-        symptoms = []
-        for kw, sym in self.SYMPTOM_KEYWORDS:
-            if kw in t and sym not in symptoms:
-                symptoms.append(sym)
-
-        diagnosis = None
-        for kw, dx in self.DIAG_KEYWORDS:
-            if kw in t:
-                diagnosis = dx
-                break
-
-        return {"symptoms": symptoms, "diagnosis": diagnosis}
+        resp = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": (
+                    f"Extract symptoms and diagnosis from student clinical text.\n"
+                    f"Return JSON: {{\"present\": [...], \"absent\": [...], \"diagnosis\": \"...\" or null}}\n"
+                    f"- 'present': symptoms the student confirms are present\n"
+                    f"- 'absent': symptoms the student explicitly states are absent or ruled out\n"
+                    f"Valid symptoms: {VALID_SYMPTOMS}\n"
+                    f"Valid diseases: {VALID_DISEASES}\n"
+                    f"Only return names from these lists exactly as written."
+                )},
+                {"role": "user", "content": text},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0,
+        )
+        result = json.loads(resp.choices[0].message.content)
+        present = [s for s in result.get("present", []) if s in VALID_SYMPTOMS]
+        absent = [s for s in result.get("absent", []) if s in VALID_SYMPTOMS]
+        diagnosis = result.get("diagnosis") if result.get("diagnosis") in VALID_DISEASES else None
+        return {"present": present, "absent": absent, "diagnosis": diagnosis}
