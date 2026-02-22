@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 @dataclass
 class ConversationState:
@@ -15,6 +15,10 @@ class ConversationState:
     # LLM grounding artifacts (computed once per case)
     bayes_summary: Dict[str, Any] = field(default_factory=dict)
     medgemma_packet: str = ""
+
+    # Evaluation artifacts
+    eval_packet: Dict[str, Any] = field(default_factory=dict)
+    turns_to_meet_all_metrics: Optional[int] = None
 
     reasoning_progress: Dict[str, bool] = field(default_factory=lambda: {
         "identified_key_information": False,

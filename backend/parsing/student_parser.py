@@ -46,5 +46,10 @@ class StudentInputParser:
         result = json.loads(resp.choices[0].message.content)
         present = [s for s in result.get("present", []) if s in VALID_SYMPTOMS]
         absent = [s for s in result.get("absent", []) if s in VALID_SYMPTOMS]
-        diagnoses = [d for d in result.get("diagnoses", []) if d in VALID_DISEASES]
-        return {"present": present, "absent": absent, "diagnoses": diagnoses}
+        diagnoses = result.get("diagnoses", [])  # DO NOT FILTER
+
+        return {
+            "present": present,
+            "absent": absent,
+            "diagnoses": diagnoses,
+        }
