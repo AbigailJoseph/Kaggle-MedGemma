@@ -41,7 +41,6 @@ sessions: Dict[str, ClinicalTutoringPipeline] = {}
 
 class StartResponse(BaseModel):
     session_id: str
-    message: str
 
 
 class MessageRequest(BaseModel):
@@ -59,8 +58,7 @@ def start_session():
     session_id = str(uuid.uuid4())
     pipeline = ClinicalTutoringPipeline()
     sessions[session_id] = pipeline
-    initial_message = pipeline.start()
-    return StartResponse(session_id=session_id, message=initial_message)
+    return StartResponse(session_id=session_id)
 
 
 @app.post("/api/session/message", response_model=MessageResponse)
