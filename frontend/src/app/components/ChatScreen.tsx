@@ -44,7 +44,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         // 1. Create a new backend session
         const startRes = await fetch("/api/session/start", { method: "POST" });
         if (!startRes.ok) throw new Error(`Server error ${startRes.status}`);
-        const startData: { session_id: string; message: string } = await startRes.json();
+        const startData: { session_id: string } = await startRes.json();
         if (cancelled) return;
 
         const sid = startData.session_id;
@@ -58,15 +58,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
           timestamp: new Date(),
         };
 
-        // Show the AI attending's opening greeting
-        const openingMsg: Message = {
-          id: "init-attending",
-          role: "attending",
-          content: startData.message,
-          timestamp: new Date(),
-        };
-
-        // 2. Send the student's case presentation to the pipeline
+        // Send the student's case presentation to the pipeline
         const stepRes = await fetch("/api/session/message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -83,7 +75,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
           timestamp: new Date(),
         };
 
-        setMessages([studentMsg, openingMsg, firstResponseMsg]);
+        setMessages([studentMsg, firstResponseMsg]);
       } catch (err) {
         if (!cancelled) setError("Could not connect to the backend. Make sure the server is running.");
       } finally {
