@@ -74,31 +74,30 @@ class ClinicalTutoringPipeline:
         )
 
     def step(self, student_input: str) -> str:
-        parsed = self.parser.parse(student_input)
-        self.state.student_diagnosis = parsed.get("diagnosis")
+        # Parse and update Bayes net only on the initial case presentation
+        if self.state.turn_number == 0:
+            parsed = self.parser.parse(student_input)
+            self.state.student_diagnoses = parsed.get("diagnoses", [])
 
-        # Track symptoms across turns
-        for s in parsed.get("present", []):
-            if s not in self.state.symptoms_identified:
-                self.state.symptoms_identified.append(s)
-        for s in parsed.get("absent", []):
-            if s not in self.state.symptoms_absent:
-                self.state.symptoms_absent.append(s)
+            for s in parsed.get("present", []):
+                if s not in self.state.symptoms_identified:
+                    self.state.symptoms_identified.append(s)
+            for s in parsed.get("absent", []):
+                if s not in self.state.symptoms_absent:
+                    self.state.symptoms_absent.append(s)
 
-        # Update Bayes net — present pushes up, absent pushes down
-        evidence = {s: True for s in self.state.symptoms_identified}
-        evidence.update({s: False for s in self.state.symptoms_absent})
-        self.bayes_net.set_evidence(evidence)
-        self.state.bayes_summary = build_bayes_summary(self.bayes_net, evidence, top_k=5)
+            evidence = {s: True for s in self.state.symptoms_identified}
+            evidence.update({s: False for s in self.state.symptoms_absent})
+            self.bayes_net.set_evidence(evidence)
+            self.state.bayes_summary = build_bayes_summary(self.bayes_net, evidence, top_k=5)
+            self.state.medgemma_packet = query_medgemma(
+                build_medgemma_prompt(self.state.bayes_summary)
+            )
 
-        # Re-query MedGemma with updated differential
-        self.state.medgemma_packet = query_medgemma(
-            build_medgemma_prompt(self.state.bayes_summary)
+        supported = any(
+            self.diagnosis_eval.is_supported(self.bayes_net, dx)
+            for dx in self.state.student_diagnoses
         )
-
-        supported = False
-        if self.state.student_diagnosis:
-            supported = self.diagnosis_eval.is_supported(self.bayes_net, self.state.student_diagnosis)
 
         self.state.turn_number += 1
 

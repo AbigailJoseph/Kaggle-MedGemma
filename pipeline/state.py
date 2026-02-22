@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 
 @dataclass
 class ConversationState:
@@ -10,7 +10,7 @@ class ConversationState:
 
     symptoms_identified: List[str] = field(default_factory=list)
     symptoms_absent: List[str] = field(default_factory=list)
-    student_diagnosis: Optional[str] = None
+    student_diagnoses: List[str] = field(default_factory=list)
 
     # LLM grounding artifacts (computed once per case)
     bayes_summary: Dict[str, Any] = field(default_factory=dict)
