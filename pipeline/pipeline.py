@@ -63,9 +63,23 @@ class ClinicalTutoringPipeline:
         self.state.student_diagnosis = parsed["diagnosis"]
 
         # Track symptoms across turns
-        for s in parsed.get("symptoms", []):
+        for s in parsed.get("present", []):
             if s not in self.state.symptoms_identified:
                 self.state.symptoms_identified.append(s)
+        for s in parsed.get("absent", []):
+            if s not in self.state.symptoms_absent:
+                self.state.symptoms_absent.append(s)
+
+        # Update Bayes net — present pushes up, absent pushes down
+        evidence = {s: True for s in self.state.symptoms_identified}
+        evidence.update({s: False for s in self.state.symptoms_absent})
+        self.bayes_net.set_evidence(evidence)
+        self.state.bayes_summary = self.bayes_net.to_summary(k=5)
+
+        # Re-query MedGemma with updated differential
+        self.state.medgemma_packet = query_medgemma(
+            build_medgemma_prompt(self.state.symptoms_identified, self.state.bayes_summary)
+        )
 
         supported = False
         if self.state.student_diagnosis is not None:
