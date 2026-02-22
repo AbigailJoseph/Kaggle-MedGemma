@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 try:
     from openai import OpenAI
@@ -11,7 +11,7 @@ SYSTEM_PROMPT = """You are the AI Attending Physician (AI-AP) coaching a medical
 The student is the user.
 
 Hard rules:
-1) Ground your feedback ONLY in: EHR_FINDINGS, BAYES_NET_SUMMARY, MEDGEMMA_KNOWLEDGE_PACKET.
+1) Ground your feedback ONLY in: BAYES_NET_SUMMARY, MEDGEMMA_KNOWLEDGE_PACKET.
 2) Never invent patient facts. If missing, ask a question or suggest a test.
 3) Compare the student's diagnosis to the Bayes net differential.
 4) Be constructive and specific.
@@ -31,25 +31,22 @@ class AIAttending:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-    def initial_message(self, ehr_findings: List[str], bayes_summary: Dict[str, Any], medgemma_packet: str) -> str:
-        context = self._make_context(ehr_findings, bayes_summary, medgemma_packet, student_state={"turn_number": 0})
+    def initial_message(self, bayes_summary: Dict[str, Any], medgemma_packet: str) -> str:
+        context = self._make_context(bayes_summary, medgemma_packet, student_state={"turn_number": 0})
         return self._chat(context, user_message="(Start the session.)")
 
-    def respond(self, state, ehr_findings: List[str], student_input: str, diagnosis_supported: bool) -> str:
+    def respond(self, state, student_input: str, diagnosis_supported: bool) -> str:
         student_state = {
             "turn_number": state.turn_number,
             "student_diagnosis": state.student_diagnosis,
             "diagnosis_supported": diagnosis_supported,
             "symptoms_identified": state.symptoms_identified,
         }
-        context = self._make_context(ehr_findings, state.bayes_summary, state.medgemma_packet, student_state)
+        context = self._make_context(state.bayes_summary, state.medgemma_packet, student_state)
         return self._chat(context, user_message=student_input)
 
-    def _make_context(self, ehr_findings, bayes_summary, medgemma_packet, student_state) -> str:
-        return f"""EHR_FINDINGS:
-{ehr_findings}
-
-BAYES_NET_SUMMARY:
+    def _make_context(self, bayes_summary, medgemma_packet, student_state) -> str:
+        return f"""BAYES_NET_SUMMARY:
 {bayes_summary}
 
 MEDGEMMA_KNOWLEDGE_PACKET:
