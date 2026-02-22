@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Card } from "./ui/card";
@@ -20,54 +20,126 @@ interface ChatScreenProps {
 }
 
 export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScreenProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "student",
-      content: initialPresentation,
-      timestamp: new Date(Date.now() - 300000)
-    },
-    {
-      id: "2",
-      role: "attending",
-      content: "Thank you for that presentation. I can see you've identified some key findings. Your working diagnosis of acute coronary syndrome is on the right track given the elevated troponin and clinical presentation.\n\nLet me ask you this: What specific features in this case make you favor NSTEMI over unstable angina? And what about the elevated BNP - how does that factor into your thinking?",
-      timestamp: new Date(Date.now() - 240000)
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isCaseSummaryOpen, setIsCaseSummaryOpen] = useState(true);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to the latest message whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // On mount: start a session and send the student's initial presentation
+  useEffect(() => {
+    let cancelled = false;
+
+    async function initSession() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // 1. Create a new backend session
+        const startRes = await fetch("/api/session/start", { method: "POST" });
+        if (!startRes.ok) throw new Error(`Server error ${startRes.status}`);
+        const startData: { session_id: string; message: string } = await startRes.json();
+        if (cancelled) return;
+
+        const sid = startData.session_id;
+        setSessionId(sid);
+
+        // Show the student's initial presentation
+        const studentMsg: Message = {
+          id: "init-student",
+          role: "student",
+          content: initialPresentation,
+          timestamp: new Date(),
+        };
+
+        // Show the AI attending's opening greeting
+        const openingMsg: Message = {
+          id: "init-attending",
+          role: "attending",
+          content: startData.message,
+          timestamp: new Date(),
+        };
+
+        // 2. Send the student's case presentation to the pipeline
+        const stepRes = await fetch("/api/session/message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sid, text: initialPresentation }),
+        });
+        if (!stepRes.ok) throw new Error(`Server error ${stepRes.status}`);
+        const stepData: { message: string } = await stepRes.json();
+        if (cancelled) return;
+
+        const firstResponseMsg: Message = {
+          id: "init-response",
+          role: "attending",
+          content: stepData.message,
+          timestamp: new Date(),
+        };
+
+        setMessages([studentMsg, openingMsg, firstResponseMsg]);
+      } catch (err) {
+        if (!cancelled) setError("Could not connect to the backend. Make sure the server is running.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    initSession();
+    return () => { cancelled = true; };
+  }, [initialPresentation]);
 
   const reasoningProgress = {
-    workingDiagnosis: 85,
-    differential: 70,
-    diagnosticWorkup: 60,
-    managementPlan: 45,
-    logicalReasoning: 75
+    workingDiagnosis: 0,
+    differential: 0,
+    diagnosticWorkup: 0,
+    managementPlan: 0,
+    logicalReasoning: 0,
   };
 
-  const handleSendMessage = () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async () => {
+    if (!input.trim() || !sessionId || isLoading) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: "student",
-      content: input,
-      timestamp: new Date()
-    };
-
-    setMessages([...messages, newMessage]);
+    const userText = input;
     setInput("");
 
-    // Simulate attending response
-    setTimeout(() => {
-      const response: Message = {
+    const studentMsg: Message = {
+      id: Date.now().toString(),
+      role: "student",
+      content: userText,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, studentMsg]);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/session/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, text: userText }),
+      });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data: { message: string } = await res.json();
+
+      const attendingMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "attending",
-        content: "Good thinking. You're correctly identifying the significance of the elevated troponin in distinguishing NSTEMI from unstable angina. Now, let's discuss your management plan. What would be your immediate next steps for this patient?",
-        timestamp: new Date()
+        content: data.message,
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, response]);
-    }, 1500);
+      setMessages(prev => [...prev, attendingMsg]);
+    } catch {
+      setError("Failed to get a response. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -101,12 +173,12 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
             <CollapsibleContent className="space-y-4">
               <div>
                 <h4 className="text-sm font-semibold mb-2 text-[--navy]">Patient</h4>
-                <p className="text-sm text-muted-foreground">J.M., 62-year-old male</p>
+                <p className="text-sm text-muted-foreground">89-year-old male — Case 12-2010</p>
               </div>
 
               <div>
                 <h4 className="text-sm font-semibold mb-2 text-[--navy]">Chief Complaint</h4>
-                <p className="text-sm text-muted-foreground">Chest pain and SOB × 2 hours</p>
+                <p className="text-sm text-muted-foreground">Progressive dyspnea × 6 months, acutely worse × 3 days</p>
               </div>
 
               <div>
@@ -114,19 +186,23 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                 <ul className="space-y-1 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <AlertCircle className="w-3 h-3 text-red-500 mt-0.5" />
-                    <span>Troponin I: 0.8 ng/mL (elevated)</span>
+                    <span>O2 sat 78% RA → 91% on 6L NC</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <AlertCircle className="w-3 h-3 text-yellow-500 mt-0.5" />
-                    <span>BNP: 450 pg/mL</span>
+                    <AlertCircle className="w-3 h-3 text-red-500 mt-0.5" />
+                    <span>JVP 14 cm above RA; crackles to mid-lung</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <AlertCircle className="w-3 h-3 text-red-500 mt-0.5" />
+                    <span>RV dilated/hypokinetic; mod-severe TR; PAH</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-[--teal] text-xs">•</span>
-                    <span>BP: 148/92, HR: 102</span>
+                    <span>BP 105/43, HR 81 (paced), RR 28, T 36.1°C</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-[--teal] text-xs">•</span>
-                    <span>O2 Sat: 94% RA</span>
+                    <span>CT: honeycomb changes, traction bronchiectasis, ground-glass; calcified pleural plaques</span>
                   </li>
                 </ul>
               </div>
@@ -134,9 +210,10 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
               <div>
                 <h4 className="text-sm font-semibold mb-2 text-[--navy]">PMH</h4>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• HTN, T2DM</li>
-                  <li>• Hyperlipidemia</li>
-                  <li>• Former smoker</li>
+                  <li>• CAD, complete heart block (dual pacemaker)</li>
+                  <li>• DM, HTN, hyperlipidemia, CVD</li>
+                  <li>• Asbestos exposure (retired plumber, shipyard)</li>
+                  <li>• 150 pack-year smoking history</li>
                 </ul>
               </div>
             </CollapsibleContent>
@@ -147,6 +224,12 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         <div className="flex-1 flex flex-col">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {error && (
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                {error}
+              </div>
+            )}
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -181,6 +264,22 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                 )}
               </div>
             ))}
+            {isLoading && (
+              <div className="flex gap-4 justify-start">
+                <div className="w-10 h-10 rounded-full bg-[--navy] flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">AI Attending is thinking</span>
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:300ms]" />
+                  </span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
@@ -200,7 +299,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
               />
               <Button
                 onClick={handleSendMessage}
-                disabled={!input.trim()}
+                disabled={!input.trim() || isLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 shadow-lg"
               >
                 <Send className="w-4 h-4" />
