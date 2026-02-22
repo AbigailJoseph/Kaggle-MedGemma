@@ -3,7 +3,8 @@ from pipeline.pipeline import ClinicalTutoringPipeline
 def main():
     pipeline = ClinicalTutoringPipeline()
 
-    print("AI Attending: Let's discuss this patient case.")
+    # AI-AP speaks first (as you requested)
+    print(f"AI Attending: {pipeline.start()}")
     print("Type 'exit' to end the session.\n")
 
     while True:
