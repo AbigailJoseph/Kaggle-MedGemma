@@ -112,13 +112,6 @@ class ClinicalTutoringPipeline:
         self.attending = AIAttending()
         self.presentation_workflow = PresentationWorkflow()
 
-    # FIRST MESSAGE
-    def start(self) -> str:
-        return (
-            "Please present your case. Include: one-liner, key symptoms, relevant PMH, "
-            "exam/vitals, key tests/imaging if available, and your working diagnosis + top differential."
-        )
-
     # STEP
     def step(self, student_input: str) -> str:
 

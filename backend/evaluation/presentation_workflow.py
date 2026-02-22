@@ -10,15 +10,50 @@ from openai import OpenAI
 METRICS_RUBRIC = """
 EVALUATION METRICS FOR MEDICAL CASE PRESENTATIONS:
 
-1. FOCUSED, RELEVANT INFORMATION SELECTION (MOST IMPORTANT)
-2. CLEAR STATEMENT OF WORKING DIAGNOSIS
-3. LOGICAL ORGANIZATION + CLINICAL REASONING
-4. INCLUSION OF PRIORITIZED DIFFERENTIAL DIAGNOSIS
-5. CONCISENESS + EFFICIENT DELIVERY
-6. PRIORITIZED, RATIONAL DIAGNOSTIC WORKUP PLAN
-7. PRIORITIZED MANAGEMENT PLAN AND DISPOSITION
-8. EVIDENCE OF HYPOTHESIS-DRIVEN INQUIRY
-9. ABILITY TO SYNTHESIZE (NOT JUST REPORT)
+    1. FOCUSED, RELEVANT INFORMATION SELECTION (MOST IMPORTANT)
+       - Includes only details that support their diagnosis
+       - Omits extraneous information that doesn't impact reasoning
+       - Shows diagnostic thinking, not passive reporting
+    
+    2. CLEAR STATEMENT OF WORKING DIAGNOSIS
+       - States hypothesis early in presentation
+       - Justifies with structured data
+       - Shows confidence and synthesis ability
+    
+    3. LOGICAL ORGANIZATION + CLINICAL REASONING
+       - Explains how symptoms → reasoning → diagnosis connect
+       - Uses "why" statements to connect findings to hypotheses
+       - Demonstrates proper clinical reasoning flow
+    
+    4. INCLUSION OF PRIORITIZED DIFFERENTIAL DIAGNOSIS
+       - Provides alternative diagnoses considered
+       - Prioritizes differentials logically
+       - Avoids unfocused long lists
+    
+    5. CONCISENESS + EFFICIENT DELIVERY
+       - Presentation is short (few minutes)
+       - Well-structured and purposeful
+       - No wandering or unfocused content
+    
+    6. PRIORITIZED, RATIONAL DIAGNOSTIC WORKUP PLAN
+       - Identifies which initial tests are needed first
+       - Explains why tests matter and how they change management
+       - Shows understanding of test prioritization
+    
+    7. PRIORITIZED MANAGEMENT PLAN AND DISPOSITION
+       - Management is ordered and justified
+       - Avoids unnecessary tests
+       - Links decisions back to diagnosis
+    
+    8. EVIDENCE OF HYPOTHESIS-DRIVEN INQUIRY
+       - Shows clear working hypothesis
+       - Knows which information matters
+       - Each piece of plan flows from hypothesis
+    
+    9. ABILITY TO SYNTHESIZE (NOT JUST REPORT)
+       - Provides summary statements
+       - Distills key clues
+       - Shows clear pivot from data → meaning
 """.strip()
 
 
