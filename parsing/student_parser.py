@@ -29,10 +29,11 @@ class StudentInputParser:
             model=self.model,
             messages=[
                 {"role": "system", "content": (
-                    f"Extract symptoms and diagnosis from student clinical text.\n"
-                    f"Return JSON: {{\"present\": [...], \"absent\": [...], \"diagnosis\": \"...\" or null}}\n"
+                    f"Extract symptoms and diagnoses from student clinical text.\n"
+                    f"Return JSON: {{\"present\": [...], \"absent\": [...], \"diagnoses\": [...]}}\n"
                     f"- 'present': symptoms the student confirms are present\n"
                     f"- 'absent': symptoms the student explicitly states are absent or ruled out\n"
+                    f"- 'diagnoses': all diagnoses the student proposes as possibilities (their differential list), even if uncertain\n"
                     f"Valid symptoms: {VALID_SYMPTOMS}\n"
                     f"Valid diseases: {VALID_DISEASES}\n"
                     f"Only return names from these lists exactly as written."
@@ -45,5 +46,5 @@ class StudentInputParser:
         result = json.loads(resp.choices[0].message.content)
         present = [s for s in result.get("present", []) if s in VALID_SYMPTOMS]
         absent = [s for s in result.get("absent", []) if s in VALID_SYMPTOMS]
-        diagnosis = result.get("diagnosis") if result.get("diagnosis") in VALID_DISEASES else None
-        return {"present": present, "absent": absent, "diagnosis": diagnosis}
+        diagnoses = [d for d in result.get("diagnoses", []) if d in VALID_DISEASES]
+        return {"present": present, "absent": absent, "diagnoses": diagnoses}

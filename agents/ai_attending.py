@@ -38,7 +38,7 @@ class AIAttending:
     def respond(self, state, student_input: str, diagnosis_supported: bool) -> str:
         student_state = {
             "turn_number": state.turn_number,
-            "student_diagnosis": state.student_diagnosis,
+            "student_diagnoses": state.student_diagnoses,
             "diagnosis_supported": diagnosis_supported,
             "symptoms_identified": state.symptoms_identified,
         }
