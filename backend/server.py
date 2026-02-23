@@ -61,6 +61,7 @@ class MessageRequest(BaseModel):
 class MessageResponse(BaseModel):
     message: str
     metrics_status: Optional[Dict[str, Dict[str, Any]]] = None
+    evaluation: Optional[Dict[str, Any]] = None
     done: Optional[bool] = None
     turns_to_meet_all_metrics: Optional[int] = None
 
@@ -160,6 +161,7 @@ def send_message(body: MessageRequest, authorization: Optional[str] = Header(def
     return MessageResponse(
         message=response,
         metrics_status=eval_packet.get("metrics_status"),
+        evaluation=eval_packet.get("evaluation"),
         done=eval_packet.get("done"),
         turns_to_meet_all_metrics=eval_packet.get("turns_to_meet_all_metrics"),
     )
