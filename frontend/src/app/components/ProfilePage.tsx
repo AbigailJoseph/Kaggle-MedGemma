@@ -71,21 +71,21 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-[#071C5A] bg-[#071C5A]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
+            <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <div className="h-6 w-px bg-border" />
-            <h2 className="text-lg font-semibold">Your Profile</h2>
+            <div className="h-6 w-px bg-white/30" />
+            <h2 className="text-lg font-semibold text-white">Your Profile</h2>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={onStartNewCase} className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white shadow-lg">
+            <Button onClick={onStartNewCase} className="bg-white text-[#071C5A] hover:bg-white/90 shadow-lg">
               Start New Case
             </Button>
-            <Button variant="outline" onClick={onSignOut}>
+            <Button variant="outline" onClick={onSignOut} className="border-white text-white hover:bg-white/10 hover:text-white">
               Sign Out
             </Button>
           </div>

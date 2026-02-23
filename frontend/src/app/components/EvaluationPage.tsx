@@ -7,9 +7,10 @@ import { ArrowLeft, TrendingUp, Award, CheckCircle2, AlertCircle } from "lucide-
 interface EvaluationPageProps {
   onBack: () => void;
   onStartNewCase: () => void;
+  onViewProfile: () => void;
 }
 
-export function EvaluationPage({ onBack, onStartNewCase }: EvaluationPageProps) {
+export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: EvaluationPageProps) {
   const evaluation = {
     initialScore: 62,
     finalScore: 82,
@@ -47,17 +48,17 @@ export function EvaluationPage({ onBack, onStartNewCase }: EvaluationPageProps) 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-[#071C5A] bg-[#071C5A]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
+            <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <div className="h-6 w-px bg-border" />
-            <h2 className="text-lg font-semibold">Case Evaluation</h2>
+            <div className="h-6 w-px bg-white/30" />
+            <h2 className="text-lg font-semibold text-white">Case Evaluation</h2>
           </div>
-          <Button onClick={onStartNewCase} className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white shadow-lg">
+          <Button onClick={onStartNewCase} className="bg-white text-[#071C5A] hover:bg-white/90 shadow-lg">
             Start New Case
           </Button>
         </div>
@@ -214,7 +215,7 @@ export function EvaluationPage({ onBack, onStartNewCase }: EvaluationPageProps) 
           <Button onClick={onStartNewCase} className="bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-lg">
             Start New Case
           </Button>
-          <Button variant="outline" onClick={() => window.location.href = "#/profile"} className="px-8 border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5">
+          <Button variant="outline" onClick={onViewProfile} className="px-8 border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5">
             View Profile
           </Button>
         </div>

@@ -215,6 +215,7 @@ export default function App() {
         <EvaluationPage
           onBack={() => setCurrentScreen("chat")}
           onStartNewCase={handleStartNewCase}
+          onViewProfile={handleViewProfile}
         />
       )}
 
