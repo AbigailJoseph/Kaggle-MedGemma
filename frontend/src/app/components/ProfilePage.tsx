@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
-import { ArrowLeft, Award, Trophy, TrendingUp, Calendar, CheckCircle2, Flame, Clock, BookOpen, Star, Target, Zap } from "lucide-react";
+import { ArrowLeft, Award, Trophy, TrendingUp, Calendar, CheckCircle2, Flame, Clock, BookOpen, Star, Target, Zap, Activity } from "lucide-react";
 
 interface ProfilePageProps {
   onBack: () => void;
   onStartNewCase: () => void;
+  onViewCase: (caseId: string) => void;
   onSignOut: () => void;
   profile: {
     name: string;
@@ -19,10 +20,36 @@ interface ProfilePageProps {
     totalHours: number;
     currentStreak: number;
   } | null;
+  recentCases: Array<{
+    id: string;
+    title: string;
+    date: string;
+    score: number;
+    specialty: string;
+    duration: string;
+  }>;
+  specialtyStats: Array<{
+    name: string;
+    cases: number;
+    avgScore: number;
+  }>;
 }
 
-export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: ProfilePageProps) {
+export function ProfilePage({ onBack, onStartNewCase, onViewCase, onSignOut, profile, recentCases, specialtyStats }: ProfilePageProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const hasPerfectCase = recentCases.some((case_) => case_.score >= 100);
+  const CASES_PER_PAGE = 5;
+
+  const totalHistoryPages = Math.max(1, Math.ceil(recentCases.length / CASES_PER_PAGE));
+  const pagedHistory = useMemo(() => {
+    const start = (historyPage - 1) * CASES_PER_PAGE;
+    return recentCases.slice(start, start + CASES_PER_PAGE);
+  }, [historyPage, recentCases]);
+
+  useEffect(() => {
+    setHistoryPage((prev) => Math.min(prev, totalHistoryPages));
+  }, [totalHistoryPages]);
 
   const profileData = profile ?? {
     name: "Unknown User",
@@ -49,17 +76,8 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
     { id: 3, name: "10 Cases", icon: Star, color: "text-purple-600", bgColor: "bg-gradient-to-br from-purple-50 to-violet-100", borderColor: "border-purple-300", ringColor: "ring-purple-200", earned: profileData.casesCompleted >= 10 },
     { id: 4, name: "Week Streak", icon: Flame, color: "text-orange-600", bgColor: "bg-gradient-to-br from-orange-50 to-red-100", borderColor: "border-orange-300", ringColor: "ring-orange-200", earned: profileData.currentStreak >= 7 },
     { id: 5, name: "14-Day Streak", icon: Zap, color: "text-emerald-600", bgColor: "bg-gradient-to-br from-emerald-50 to-teal-100", borderColor: "border-emerald-300", ringColor: "ring-emerald-200", earned: profileData.currentStreak >= 14 },
-    { id: 6, name: "Perfect Score", icon: Trophy, color: "text-rose-600", bgColor: "bg-gradient-to-br from-rose-50 to-pink-100", borderColor: "border-rose-300", ringColor: "ring-rose-200", earned: profileData.overallProficiency >= 95 },
+    { id: 6, name: "Perfect Score", icon: Trophy, color: "text-rose-600", bgColor: "bg-gradient-to-br from-rose-50 to-pink-100", borderColor: "border-rose-300", ringColor: "ring-rose-200", earned: hasPerfectCase },
   ];
-
-  const recentCases: Array<{
-    id: number;
-    title: string;
-    date: string;
-    score: number;
-    specialty: string;
-    duration: string;
-  }> = [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -197,10 +215,11 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
           </div>
           {recentCases.length > 0 ? (
             <div className="space-y-3">
-              {recentCases.map((case_) => (
+              {pagedHistory.map((case_) => (
                 <div
                   key={case_.id}
                   className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-300 hover:bg-blue-50/30 transition-colors cursor-pointer"
+                  onClick={() => onViewCase(case_.id)}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div>
@@ -224,12 +243,66 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
                   </Badge>
                 </div>
               ))}
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-xs text-slate-600">
+                  Page {historyPage} of {totalHistoryPages}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                    disabled={historyPage <= 1}
+                    onClick={() => setHistoryPage((prev) => Math.max(1, prev - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                    disabled={historyPage >= totalHistoryPages}
+                    onClick={() => setHistoryPage((prev) => Math.min(totalHistoryPages, prev + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="rounded-xl border-2 border-dashed border-slate-200 p-8 text-center">
               <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-600">No completed cases yet.</p>
               <p className="text-xs text-slate-600 mt-1">Start a case to see your training history here.</p>
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-6 mb-6 shadow-sm border border-blue-200 bg-blue-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="font-bold text-xl text-slate-900">Specialty Stats</h3>
+          </div>
+          {specialtyStats.length > 0 ? (
+            <div className="space-y-4">
+              {specialtyStats.map((specialty) => (
+                <div key={specialty.name}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{specialty.name}</p>
+                      <p className="text-xs text-slate-600">{specialty.cases} cases</p>
+                    </div>
+                    <span className="text-sm font-semibold text-[#071C5A]">{specialty.avgScore}%</span>
+                  </div>
+                  <Progress value={specialty.avgScore} className="h-2.5" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-sm text-slate-600 text-center">
+              No specialty stats yet. Complete cases to populate this section.
             </div>
           )}
         </Card>
@@ -254,7 +327,7 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
                 <span className="text-3xl font-bold text-blue-900">{profileData.overallProficiency}%</span>
                 <span className="text-sm text-blue-400">/ 85%</span>
               </div>
-              <Progress value={(profileData.overallProficiency / 85) * 100} className="h-2.5 bg-blue-200" />
+              <Progress value={Math.min(100, (profileData.overallProficiency / 85) * 100)} className="h-2.5 bg-blue-200" />
             </div>
             <div className="p-5 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-100">
               <div className="flex items-center gap-2 mb-3">
@@ -267,7 +340,7 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
                 <span className="text-3xl font-bold text-purple-900">{profileData.casesCompleted}</span>
                 <span className="text-sm text-purple-400">/ 30</span>
               </div>
-              <Progress value={(profileData.casesCompleted / 30) * 100} className="h-2.5 bg-purple-200" />
+              <Progress value={Math.min(100, (profileData.casesCompleted / 30) * 100)} className="h-2.5 bg-purple-200" />
             </div>
             <div className="p-5 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100">
               <div className="flex items-center gap-2 mb-3">
@@ -280,7 +353,7 @@ export function ProfilePage({ onBack, onStartNewCase, onSignOut, profile }: Prof
                 <span className="text-3xl font-bold text-orange-900">{profileData.currentStreak}</span>
                 <span className="text-sm text-orange-400">/ 14</span>
               </div>
-              <Progress value={(profileData.currentStreak / 14) * 100} className="h-2.5 bg-orange-200" />
+              <Progress value={Math.min(100, (profileData.currentStreak / 14) * 100)} className="h-2.5 bg-orange-200" />
             </div>
           </div>
         </Card>

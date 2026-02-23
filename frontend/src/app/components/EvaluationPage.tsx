@@ -8,46 +8,30 @@ interface EvaluationPageProps {
   onBack: () => void;
   onStartNewCase: () => void;
   onViewProfile: () => void;
+  evaluation: {
+    initialScore: number;
+    finalScore: number;
+    proficiency: string;
+    strengths: string[];
+    areasForGrowth: string[];
+    performanceBreakdown: Array<{ label: string; value: number }>;
+    transcript: Array<{ role: "student" | "attending"; content: string; timestamp: string }>;
+  } | null;
 }
 
-export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: EvaluationPageProps) {
-  const evaluation = {
-    initialScore: 62,
-    finalScore: 82,
-    proficiency: "Proficient",
-    strengths: [
-      "Excellent identification of key clinical findings (elevated troponin, chest pain characteristics)",
-      "Strong differential diagnosis construction with clear reasoning",
-      "Appropriate prioritization of life-threatening conditions"
-    ],
-    areasForGrowth: [
-      "Consider integrating social history and risk factors earlier in presentation",
-      "Expand discussion of alternative diagnoses with specific evidence against them",
-      "Elaborate on medication contraindications and patient-specific considerations"
-    ]
+export function EvaluationPage({ onBack, onStartNewCase, onViewProfile, evaluation }: EvaluationPageProps) {
+  const data = evaluation ?? {
+    initialScore: 0,
+    finalScore: 0,
+    proficiency: "Beginner",
+    strengths: [],
+    areasForGrowth: [],
+    performanceBreakdown: [],
+    transcript: [],
   };
-
-  const transcript = [
-    {
-      role: "student",
-      content: "This is a 62-year-old male presenting with acute onset substernal chest pressure...",
-      timestamp: "10:23 AM"
-    },
-    {
-      role: "attending",
-      content: "Thank you for that presentation. I can see you've identified some key findings...",
-      timestamp: "10:24 AM"
-    },
-    {
-      role: "student",
-      content: "The elevated troponin indicates myocardial injury...",
-      timestamp: "10:26 AM"
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="border-b border-[#071C5A] bg-[#071C5A]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -65,15 +49,14 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Performance Summary */}
         <Card className="p-8 mb-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl border-l-4 border-l-[#071C5A]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
               <Award className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Excellent Progress!</h2>
-              <p className="text-slate-700">Case #2847 - Chest Pain Evaluation</p>
+              <h2 className="text-2xl font-bold text-slate-900">Case Complete</h2>
+              <p className="text-slate-700">Your performance summary</p>
             </div>
           </div>
 
@@ -81,7 +64,7 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
             <div className="bg-white p-6 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700 mb-2">Initial Assessment</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-slate-900">{evaluation.initialScore}</span>
+                <span className="text-4xl font-bold text-slate-900">{data.initialScore}</span>
                 <span className="text-slate-700">/ 100</span>
               </div>
             </div>
@@ -89,7 +72,7 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
             <div className="bg-white p-6 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700 mb-2">Final Assessment</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-teal-600">{evaluation.finalScore}</span>
+                <span className="text-4xl font-bold text-teal-600">{data.finalScore}</span>
                 <span className="text-slate-700">/ 100</span>
               </div>
             </div>
@@ -98,19 +81,18 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
               <p className="text-sm text-slate-700 mb-2">Improvement</p>
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-green-600" />
-                <span className="text-4xl font-bold text-green-600">+{evaluation.finalScore - evaluation.initialScore}</span>
+                <span className="text-4xl font-bold text-green-600">+{Math.max(0, data.finalScore - data.initialScore)}</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="text-sm text-slate-700">Proficiency Level:</span>
-            <Badge className="bg-[#071C5A] text-white px-4 py-1">{evaluation.proficiency}</Badge>
+            <Badge className="bg-[#071C5A] text-white px-4 py-1">{data.proficiency}</Badge>
           </div>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Strengths */}
           <Card className="p-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow">
@@ -118,17 +100,20 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
               </div>
               <h3 className="font-bold text-lg text-slate-900">Strengths</h3>
             </div>
-            <ul className="space-y-3">
-              {evaluation.strengths.map((strength, index) => (
-                <li key={index} className="flex items-start gap-3 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-slate-700">{strength}</span>
-                </li>
-              ))}
-            </ul>
+            {data.strengths.length > 0 ? (
+              <ul className="space-y-3">
+                {data.strengths.map((strength, index) => (
+                  <li key={index} className="flex items-start gap-3 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-slate-700">{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-slate-700">No strengths were captured for this case yet.</p>
+            )}
           </Card>
 
-          {/* Areas for Growth */}
           <Card className="p-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow">
@@ -136,18 +121,21 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
               </div>
               <h3 className="font-bold text-lg text-slate-900">Areas for Growth</h3>
             </div>
-            <ul className="space-y-3">
-              {evaluation.areasForGrowth.map((area, index) => (
-                <li key={index} className="flex items-start gap-3 text-sm">
-                  <AlertCircle className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" />
-                  <span className="text-slate-700">{area}</span>
-                </li>
-              ))}
-            </ul>
+            {data.areasForGrowth.length > 0 ? (
+              <ul className="space-y-3">
+                {data.areasForGrowth.map((area, index) => (
+                  <li key={index} className="flex items-start gap-3 text-sm">
+                    <AlertCircle className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" />
+                    <span className="text-slate-700">{area}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-slate-700">No specific growth areas captured for this case.</p>
+            )}
           </Card>
         </div>
 
-        {/* Detailed Breakdown */}
         <Card className="p-6 mb-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow">
@@ -155,72 +143,49 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
             </div>
             <h3 className="font-bold text-lg text-slate-900">Performance Breakdown</h3>
           </div>
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-900">Working Diagnosis</span>
-                <span className="text-sm text-slate-700">85%</span>
-              </div>
-              <Progress value={85} className="h-2" />
+          {data.performanceBreakdown.length > 0 ? (
+            <div className="space-y-4">
+              {data.performanceBreakdown.map((item) => (
+                <div key={item.label}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-900">{item.label}</span>
+                    <span className="text-sm text-slate-700">{item.value}%</span>
+                  </div>
+                  <Progress value={item.value} className="h-2" />
+                </div>
+              ))}
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-900">Differential Reasoning</span>
-                <span className="text-sm text-slate-700">78%</span>
-              </div>
-              <Progress value={78} className="h-2" />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-900">Diagnostic Workup</span>
-                <span className="text-sm text-slate-700">82%</span>
-              </div>
-              <Progress value={82} className="h-2" />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-900">Management Planning</span>
-                <span className="text-sm text-slate-700">80%</span>
-              </div>
-              <Progress value={80} className="h-2" />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-900">Clinical Communication</span>
-                <span className="text-sm text-slate-700">88%</span>
-              </div>
-              <Progress value={88} className="h-2" />
-            </div>
-          </div>
+          ) : (
+            <p className="text-sm text-slate-700">No detailed metric breakdown available for this case.</p>
+          )}
         </Card>
 
-        {/* Full Transcript */}
         <Card className="p-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow">
               <MessageSquare className="w-5 h-5 text-white" />
             </div>
-            <h3 className="font-bold text-lg text-slate-900">Full Conversation Transcript</h3>
+            <h3 className="font-bold text-lg text-slate-900">Conversation Transcript</h3>
           </div>
-          <div className="space-y-4">
-            {transcript.map((message, index) => (
-              <div key={index} className="border-l-2 border-blue-300 pl-4 py-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-bold text-slate-900">
-                    {message.role === "student" ? "You" : "AI Attending"}
-                  </span>
-                  <span className="text-xs text-slate-600">{message.timestamp}</span>
+          {data.transcript.length > 0 ? (
+            <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+              {data.transcript.map((message, index) => (
+                <div key={index} className="border-l-2 border-blue-300 pl-4 py-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-bold text-slate-900">
+                      {message.role === "student" ? "You" : "AI Attending"}
+                    </span>
+                    <span className="text-xs text-slate-600">{message.timestamp}</span>
+                  </div>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{message.content}</p>
                 </div>
-                <p className="text-sm text-slate-700">{message.content}</p>
-              </div>
-            ))}
-            <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm">
-              View Full Transcript
-            </Button>
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-700">No transcript available.</p>
+          )}
         </Card>
 
-        {/* Action Buttons */}
         <div className="flex gap-4 mt-8 justify-center">
           <Button onClick={onStartNewCase} className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white px-8 shadow-lg">
             Start New Case

@@ -5,6 +5,7 @@ import { Card } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { ArrowLeft, Send, ChevronDown, ChevronUp, User, Bot, CheckCircle2, Circle, AlertCircle, FileText, ClipboardList, Brain, Lightbulb, Activity } from "lucide-react";
+import { auth } from "../../lib/firebase";
 
 interface Message {
   id: string;
@@ -13,10 +14,58 @@ interface Message {
   timestamp: Date;
 }
 
+interface MetricsStatusItem {
+  name: string;
+  status: "met" | "partial" | "missing" | "misconception";
+  confidence: number;
+}
+
+interface EvaluationMetric {
+  metric_id: string;
+  metric_name: string;
+  status: "met" | "partial" | "missing" | "misconception";
+  confidence: number;
+  evidence?: string;
+  gaps?: string;
+}
+
+interface SessionFinalizeResponse {
+  summary: {
+    metrics_status?: Record<string, MetricsStatusItem>;
+    turns_to_meet_all_metrics?: number | null;
+  };
+  latest_evaluation?: {
+    evaluations?: EvaluationMetric[];
+  };
+  initial_evaluation?: {
+    evaluations?: EvaluationMetric[];
+  } | null;
+}
+
+interface SessionMessageResponse {
+  message: string;
+  metrics_status?: Record<string, MetricsStatusItem>;
+  evaluation?: {
+    evaluations?: EvaluationMetric[];
+  };
+}
+
+interface CompletedCasePayload {
+  score: number;
+  initialScore: number;
+  proficiency: string;
+  strengths: string[];
+  areasForGrowth: string[];
+  performanceBreakdown: Array<{ label: string; value: number }>;
+  transcript: Array<{ role: "student" | "attending"; content: string; timestamp: string }>;
+  turnsToMeetAllMetrics: number | null;
+  durationMinutes: number;
+}
+
 interface ChatScreenProps {
   initialPresentation: string;
   onBack: () => void;
-  onComplete: () => void;
+  onComplete: (payload: CompletedCasePayload) => void;
 }
 
 export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScreenProps) {
@@ -25,8 +74,77 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   const [isCaseSummaryOpen, setIsCaseSummaryOpen] = useState(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [metricsStatus, setMetricsStatus] = useState<Record<string, MetricsStatusItem>>({});
+  const startedAtRef = useRef<number>(Date.now());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const normalizeMetricId = (value?: string) => {
+    const raw = (value ?? "").toLowerCase();
+    if (/^1(\D|$)/.test(raw) || raw.includes("focused")) return "1";
+    if (/^2(\D|$)/.test(raw) || raw.includes("working diagnosis")) return "2";
+    if (/^3(\D|$)/.test(raw) || raw.includes("logical organization") || raw.includes("clinical reasoning")) return "3";
+    if (/^4(\D|$)/.test(raw) || raw.includes("differential")) return "4";
+    if (/^5(\D|$)/.test(raw) || raw.includes("conciseness")) return "5";
+    if (/^6(\D|$)/.test(raw) || raw.includes("workup")) return "6";
+    if (/^7(\D|$)/.test(raw) || raw.includes("management")) return "7";
+    if (/^8(\D|$)/.test(raw) || raw.includes("hypothesis")) return "8";
+    if (/^9(\D|$)/.test(raw) || raw.includes("synthesize")) return "9";
+    return value ?? "";
+  };
+
+  const metricsFromEvaluations = (evaluations?: EvaluationMetric[]) => {
+    if (!evaluations?.length) return null;
+    const mapped: Record<string, MetricsStatusItem> = {};
+    for (const item of evaluations) {
+      const id = normalizeMetricId(item.metric_id || item.metric_name);
+      if (!id) continue;
+      mapped[id] = {
+        name: item.metric_name,
+        status: item.status,
+        confidence: Number(item.confidence ?? 0),
+      };
+    }
+    return Object.keys(mapped).length ? mapped : null;
+  };
+
+  const mergeMetricsStatus = (
+    directMetrics?: Record<string, MetricsStatusItem>,
+    evaluations?: EvaluationMetric[],
+  ) => {
+    const normalizedDirect: Record<string, MetricsStatusItem> = {};
+    if (directMetrics) {
+      for (const [key, metric] of Object.entries(directMetrics)) {
+        const id = normalizeMetricId(key || metric?.name);
+        if (!id || !metric) continue;
+        normalizedDirect[id] = {
+          name: metric.name,
+          status: metric.status,
+          confidence: Number(metric.confidence ?? 0),
+        };
+      }
+    }
+
+    const fromEval = metricsFromEvaluations(evaluations) ?? {};
+    const merged = { ...fromEval, ...normalizedDirect };
+    if (!Object.keys(merged).length) return;
+    setMetricsStatus((prev) => ({ ...prev, ...merged }));
+  };
+
+  const authedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("You must be signed in to continue.");
+    }
+    const token = await user.getIdToken();
+    const headers = new Headers(init?.headers ?? {});
+    headers.set("Authorization", `Bearer ${token}`);
+    if (!headers.has("Content-Type") && init?.body) {
+      headers.set("Content-Type", "application/json");
+    }
+    return fetch(input, { ...init, headers });
+  };
 
   // Scroll to the latest message whenever messages change
   useEffect(() => {
@@ -42,7 +160,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
       setError(null);
       try {
         // 1. Create a new backend session
-        const startRes = await fetch("/api/session/start", { method: "POST" });
+        const startRes = await authedFetch("/api/session/start", { method: "POST" });
         if (!startRes.ok) throw new Error(`Server error ${startRes.status}`);
         const startData: { session_id: string } = await startRes.json();
         if (cancelled) return;
@@ -59,13 +177,12 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         };
 
         // Send the student's case presentation to the pipeline
-        const stepRes = await fetch("/api/session/message", {
+        const stepRes = await authedFetch("/api/session/message", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ session_id: sid, text: initialPresentation }),
         });
         if (!stepRes.ok) throw new Error(`Server error ${stepRes.status}`);
-        const stepData: { message: string } = await stepRes.json();
+        const stepData: SessionMessageResponse = await stepRes.json();
         if (cancelled) return;
 
         const firstResponseMsg: Message = {
@@ -76,8 +193,9 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         };
 
         setMessages([studentMsg, firstResponseMsg]);
+        mergeMetricsStatus(stepData.metrics_status, stepData.evaluation?.evaluations);
       } catch (err) {
-        if (!cancelled) setError("Could not connect to the backend. Make sure the server is running.");
+        if (!cancelled) setError("Could not connect to the backend. Make sure the server is running and you are signed in.");
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -88,11 +206,11 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   }, [initialPresentation]);
 
   const reasoningProgress = {
-    workingDiagnosis: 0,
-    differential: 0,
-    diagnosticWorkup: 0,
-    managementPlan: 0,
-    logicalReasoning: 0,
+    workingDiagnosis: Math.round(((metricsStatus["2"]?.confidence ?? 0) + (metricsStatus["8"]?.confidence ?? 0)) * 50),
+    differential: Math.round((metricsStatus["4"]?.confidence ?? 0) * 100),
+    diagnosticWorkup: Math.round((metricsStatus["6"]?.confidence ?? 0) * 100),
+    managementPlan: Math.round((metricsStatus["7"]?.confidence ?? 0) * 100),
+    logicalReasoning: Math.round(((metricsStatus["3"]?.confidence ?? 0) + (metricsStatus["9"]?.confidence ?? 0)) * 50),
   };
 
   const handleSendMessage = async () => {
@@ -112,13 +230,12 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
     setError(null);
 
     try {
-      const res = await fetch("/api/session/message", {
+      const res = await authedFetch("/api/session/message", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId, text: userText }),
       });
       if (!res.ok) throw new Error(`Server error ${res.status}`);
-      const data: { message: string } = await res.json();
+      const data: SessionMessageResponse = await res.json();
 
       const attendingMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -127,10 +244,120 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, attendingMsg]);
+      mergeMetricsStatus(data.metrics_status, data.evaluation?.evaluations);
     } catch {
       setError("Failed to get a response. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const toScore = (evaluations?: EvaluationMetric[], fallbackMetrics?: Record<string, MetricsStatusItem>) => {
+    if (evaluations?.length) {
+      const metCount = evaluations.filter((item) => item.status === "met").length;
+      return Math.round((metCount / evaluations.length) * 100);
+    }
+    if (fallbackMetrics && Object.keys(fallbackMetrics).length) {
+      const items = Object.values(fallbackMetrics);
+      const metCount = items.filter((item) => item.status === "met").length;
+      return Math.round((metCount / items.length) * 100);
+    }
+    return 0;
+  };
+
+  const toBreakdown = (metrics?: Record<string, MetricsStatusItem>) => {
+    const mapMetric = (id: string, fallback: string) => {
+      const item = metrics?.[id];
+      return {
+        label: item?.name ?? fallback,
+        value: Math.round((item?.confidence ?? 0) * 100),
+      };
+    };
+    return [
+      mapMetric("2", "Working Diagnosis"),
+      mapMetric("4", "Differential Reasoning"),
+      mapMetric("6", "Diagnostic Workup"),
+      mapMetric("7", "Management Planning"),
+      mapMetric("3", "Clinical Communication"),
+    ];
+  };
+
+  const handleCompleteCase = async () => {
+    if (!sessionId || isFinalizing) return;
+    setIsFinalizing(true);
+    setError(null);
+
+    try {
+      const finalizeRes = await authedFetch("/api/session/finalize", {
+        method: "POST",
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+      if (!finalizeRes.ok) throw new Error(`Server error ${finalizeRes.status}`);
+      const finalizeData: SessionFinalizeResponse = await finalizeRes.json();
+
+      mergeMetricsStatus(
+        finalizeData.summary.metrics_status,
+        finalizeData.latest_evaluation?.evaluations,
+      );
+
+      const latestMetrics = metricsFromEvaluations(finalizeData.latest_evaluation?.evaluations)
+        ?? finalizeData.summary.metrics_status
+        ?? metricsStatus;
+      const initialMetrics = metricsFromEvaluations(finalizeData.initial_evaluation?.evaluations);
+      const initialScore = toScore(finalizeData.initial_evaluation?.evaluations, initialMetrics ?? undefined);
+      const finalScore = toScore(finalizeData.latest_evaluation?.evaluations, latestMetrics);
+      const proficiency = finalScore >= 85 ? "Advanced" : finalScore >= 70 ? "Proficient" : "Beginner";
+      const evalMetrics = finalizeData.latest_evaluation?.evaluations ?? [];
+      const strengths = evalMetrics
+        .filter((item) => item.status === "met")
+        .slice(0, 3)
+        .map((item) => item.metric_name);
+      const areasForGrowth = evalMetrics
+        .filter((item) => item.status !== "met")
+        .slice(0, 3)
+        .map((item) => item.metric_name);
+
+      const durationMinutes = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 60000));
+      const transcript = messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+        timestamp: message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }));
+
+      onComplete({
+        score: finalScore,
+        initialScore,
+        proficiency,
+        strengths,
+        areasForGrowth,
+        performanceBreakdown: toBreakdown(latestMetrics),
+        transcript,
+        turnsToMeetAllMetrics: finalizeData.summary.turns_to_meet_all_metrics ?? null,
+        durationMinutes,
+      });
+    } catch {
+      const durationMinutes = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 60000));
+      const transcript = messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+        timestamp: message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }));
+      const finalScore = toScore(undefined, metricsStatus);
+      const proficiency = finalScore >= 85 ? "Advanced" : finalScore >= 70 ? "Proficient" : "Beginner";
+
+      onComplete({
+        score: finalScore,
+        initialScore: finalScore,
+        proficiency,
+        strengths: [],
+        areasForGrowth: [],
+        performanceBreakdown: toBreakdown(metricsStatus),
+        transcript,
+        turnsToMeetAllMetrics: null,
+        durationMinutes,
+      });
+    } finally {
+      setIsFinalizing(false);
     }
   };
 
@@ -147,7 +374,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
             <div className="h-6 w-px bg-white/30" />
             <h2 className="text-lg font-semibold text-white">Case Discussion</h2>
           </div>
-          <Button onClick={onComplete} className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg">
+          <Button onClick={handleCompleteCase} disabled={!sessionId || isFinalizing} className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg">
             Complete Case
           </Button>
         </div>
