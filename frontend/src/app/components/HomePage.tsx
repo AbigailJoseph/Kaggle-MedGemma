@@ -10,15 +10,15 @@ export function HomePage({ onStartTraining, onSignIn }: HomePageProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-blue-700 bg-blue-600">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[--navy] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-semibold text-foreground">AI Attending</span>
+            <span className="text-xl font-semibold text-white">AI Attending</span>
           </div>
-          <Button variant="outline" onClick={onSignIn}>
+          <Button variant="outline" onClick={onSignIn} className="border-white text-white hover:bg-white/10 hover:text-white">
             Sign In
           </Button>
         </div>
