@@ -84,7 +84,7 @@ export function ProfilePage({ onBack, onStartNewCase }: ProfilePageProps) {
             <div className="h-6 w-px bg-border" />
             <h2 className="text-lg font-semibold">Your Profile</h2>
           </div>
-          <Button onClick={onStartNewCase} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+          <Button onClick={onStartNewCase} className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white shadow-lg">
             Start New Case
           </Button>
         </div>

@@ -10,7 +10,7 @@ export function HomePage({ onStartTraining, onSignIn }: HomePageProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-blue-700 bg-blue-600">
+      <header className="border-b border-[#071C5A] bg-[#071C5A]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -37,14 +37,14 @@ export function HomePage({ onStartTraining, onSignIn }: HomePageProps) {
           <div className="flex gap-4 justify-center">
             <Button 
               onClick={onStartTraining}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg shadow-lg"
+              className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white px-8 py-6 text-lg shadow-lg"
             >
               Start Training
             </Button>
             <Button 
               variant="outline" 
               onClick={onSignIn}
-              className="px-8 py-6 text-lg border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="px-8 py-6 text-lg border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5"
             >
               Sign In
             </Button>

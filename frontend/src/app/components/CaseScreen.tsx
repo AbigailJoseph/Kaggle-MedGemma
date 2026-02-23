@@ -21,7 +21,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-blue-700 bg-blue-600 sticky top-0 z-10">
+      <header className="border-b border-[#071C5A] bg-[#071C5A] sticky top-0 z-10">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
@@ -244,7 +244,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
               <Button
                 onClick={handleSubmit}
                 disabled={!presentation.trim()}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                className="w-full bg-[#071C5A] hover:bg-[#0d2d8a] text-white shadow-lg"
               >
                 Submit to Attending
               </Button>

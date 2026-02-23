@@ -137,7 +137,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-blue-700 bg-blue-600">
+      <header className="border-b border-[#071C5A] bg-[#071C5A]">
         <div className="max-w-[2000px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
@@ -292,7 +292,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
               <Button
                 onClick={handleSendMessage}
                 disabled={!input.trim() || isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 shadow-lg"
+                className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white px-6 shadow-lg"
               >
                 <Send className="w-4 h-4" />
               </Button>

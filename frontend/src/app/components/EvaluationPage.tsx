@@ -57,7 +57,7 @@ export function EvaluationPage({ onBack, onStartNewCase }: EvaluationPageProps) 
             <div className="h-6 w-px bg-border" />
             <h2 className="text-lg font-semibold">Case Evaluation</h2>
           </div>
-          <Button onClick={onStartNewCase} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+          <Button onClick={onStartNewCase} className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white shadow-lg">
             Start New Case
           </Button>
         </div>
@@ -214,7 +214,7 @@ export function EvaluationPage({ onBack, onStartNewCase }: EvaluationPageProps) 
           <Button onClick={onStartNewCase} className="bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-lg">
             Start New Case
           </Button>
-          <Button variant="outline" onClick={() => window.location.href = "#/profile"} className="px-8 border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
+          <Button variant="outline" onClick={() => window.location.href = "#/profile"} className="px-8 border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5">
             View Profile
           </Button>
         </div>
