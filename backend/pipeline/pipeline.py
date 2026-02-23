@@ -1,9 +1,11 @@
 # pipeline/pipeline.py
 
 from typing import Dict, Any, List, Tuple
+from pathlib import Path
 
 from dotenv import load_dotenv
-load_dotenv()
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 from bayes.noisy_or_bayesnet import NoisyORBayesNet
 from bayes.network_data import (

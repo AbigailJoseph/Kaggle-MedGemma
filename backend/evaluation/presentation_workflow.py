@@ -1,10 +1,13 @@
 # evaluation/presentation_workflow.py
 import json
 import os
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
-load_dotenv()
+
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 from openai import OpenAI
 

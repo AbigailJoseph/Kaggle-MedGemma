@@ -1,6 +1,8 @@
 from pipeline.pipeline import ClinicalTutoringPipeline
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
+ENV_PATH = Path(__file__).resolve().with_name(".env")
+load_dotenv(dotenv_path=ENV_PATH)
 
 def main():
     pipeline = ClinicalTutoringPipeline()

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Dict, Any, List
 
 try:
@@ -7,7 +8,9 @@ except ImportError:
     OpenAI = None
 
 from dotenv import load_dotenv
-load_dotenv()
+
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 
 SYSTEM_PROMPT = """You are the AI Attending Physician (AI-AP) coaching a medical student.
