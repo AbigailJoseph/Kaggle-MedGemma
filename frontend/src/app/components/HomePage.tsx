@@ -4,9 +4,19 @@ import { Stethoscope, Brain, MessageSquare, TrendingUp } from "lucide-react";
 interface HomePageProps {
   onStartTraining: () => void;
   onSignIn: () => void;
+  isSignedIn: boolean;
+  profileName?: string;
+  profilePhotoURL?: string;
 }
 
-export function HomePage({ onStartTraining, onSignIn }: HomePageProps) {
+export function HomePage({ onStartTraining, onSignIn, isSignedIn, profileName, profilePhotoURL }: HomePageProps) {
+  const initials = (profileName ?? "User")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -18,8 +28,13 @@ export function HomePage({ onStartTraining, onSignIn }: HomePageProps) {
             </div>
             <span className="text-xl font-semibold text-white">AI Attending</span>
           </div>
-          <Button variant="outline" onClick={onSignIn} className="border-white text-white hover:bg-white/10 hover:text-white">
-            Sign In
+          <Button variant="outline" onClick={onSignIn} className="border-white text-white hover:bg-white/10 hover:text-white gap-2">
+            {isSignedIn && profilePhotoURL ? (
+              <img src={profilePhotoURL} alt="Profile" referrerPolicy="no-referrer" className="w-6 h-6 rounded-full object-cover border border-white/60" />
+            ) : isSignedIn ? (
+              <span className="w-6 h-6 rounded-full bg-white/20 text-xs flex items-center justify-center">{initials}</span>
+            ) : null}
+            {isSignedIn ? "View Profile" : "Sign In"}
           </Button>
         </div>
       </header>
@@ -46,7 +61,7 @@ export function HomePage({ onStartTraining, onSignIn }: HomePageProps) {
               onClick={onSignIn}
               className="px-8 py-6 text-lg border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5"
             >
-              Sign In
+              {isSignedIn ? "View Profile" : "Sign In"}
             </Button>
           </div>
         </div>
