@@ -21,15 +21,15 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card sticky top-0 z-10">
+      <header className="border-b border-blue-700 bg-blue-600 sticky top-0 z-10">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
+            <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <div className="h-6 w-px bg-border" />
-            <h2 className="text-lg font-semibold">Case Presentation</h2>
+            <div className="h-6 w-px bg-white/30" />
+            <h2 className="text-lg font-semibold text-white">Case Presentation</h2>
           </div>
         </div>
       </header>
@@ -238,7 +238,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                 value={presentation}
                 onChange={(e) => setPresentation(e.target.value)}
                 placeholder="Begin your presentation here..."
-                className="min-h-[400px] mb-4 font-mono text-sm"
+                className="min-h-[400px] mb-4 font-mono text-sm border-ring ring-[3px] ring-ring/50"
               />
 
               <Button

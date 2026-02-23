@@ -44,7 +44,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         // 1. Create a new backend session
         const startRes = await fetch("/api/session/start", { method: "POST" });
         if (!startRes.ok) throw new Error(`Server error ${startRes.status}`);
-        const startData: { session_id: string; message: string } = await startRes.json();
+        const startData: { session_id: string } = await startRes.json();
         if (cancelled) return;
 
         const sid = startData.session_id;
@@ -58,15 +58,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
           timestamp: new Date(),
         };
 
-        // Show the AI attending's opening greeting
-        const openingMsg: Message = {
-          id: "init-attending",
-          role: "attending",
-          content: startData.message,
-          timestamp: new Date(),
-        };
-
-        // 2. Send the student's case presentation to the pipeline
+        // Send the student's case presentation to the pipeline
         const stepRes = await fetch("/api/session/message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -83,7 +75,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
           timestamp: new Date(),
         };
 
-        setMessages([studentMsg, openingMsg, firstResponseMsg]);
+        setMessages([studentMsg, firstResponseMsg]);
       } catch (err) {
         if (!cancelled) setError("Could not connect to the backend. Make sure the server is running.");
       } finally {
@@ -145,15 +137,15 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-blue-700 bg-blue-600">
         <div className="max-w-[2000px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
+            <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <div className="h-6 w-px bg-border" />
-            <h2 className="text-lg font-semibold">Case Discussion</h2>
+            <div className="h-6 w-px bg-white/30" />
+            <h2 className="text-lg font-semibold text-white">Case Discussion</h2>
           </div>
           <Button onClick={onComplete} className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg">
             Complete Case
