@@ -3,6 +3,8 @@ import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
+from dotenv import load_dotenv
+load_dotenv()
 
 from openai import OpenAI
 
@@ -333,3 +335,7 @@ Return ONLY JSON:
         )
         data = json.loads(resp.choices[0].message.content)
         return [q for q in data.get("questions", []) if isinstance(q, str)]
+    
+
+
+    

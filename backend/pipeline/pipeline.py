@@ -2,6 +2,9 @@
 
 from typing import Dict, Any, List, Tuple
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from bayes.noisy_or_bayesnet import NoisyORBayesNet
 from bayes.network_data import (
     PULMONARY_NETWORK_DATA,
@@ -157,7 +160,7 @@ class ClinicalTutoringPipeline:
             parsed = self.parser.parse(student_input)
             if parsed.get("diagnoses"):
                 self.state.student_diagnoses = parsed.get("diagnoses")
-                
+
             eval_result = self.presentation_workflow.process_answer(
                 student_input,
                 case_narrative=CASE_NARRATIVE,

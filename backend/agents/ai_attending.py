@@ -6,6 +6,9 @@ try:
 except ImportError:
     OpenAI = None
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 SYSTEM_PROMPT = """You are the AI Attending Physician (AI-AP) coaching a medical student.
 
