@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
-import { ArrowLeft, TrendingUp, Award, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, TrendingUp, Award, CheckCircle2, AlertCircle, Activity, MessageSquare } from "lucide-react";
 
 interface EvaluationPageProps {
   onBack: () => void;
@@ -46,7 +46,7 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="border-b border-[#071C5A] bg-[#071C5A]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -66,81 +66,81 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Performance Summary */}
-        <Card className="p-8 mb-6 border-l-4 border-l-[--teal]">
+        <Card className="p-8 mb-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl border-l-4 border-l-[#071C5A]">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-[--teal]/10 rounded-full flex items-center justify-center">
-              <Award className="w-6 h-6 text-[--teal]" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
+              <Award className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold">Excellent Progress!</h2>
-              <p className="text-muted-foreground">Case #2847 - Chest Pain Evaluation</p>
+              <h2 className="text-2xl font-bold text-slate-900">Excellent Progress!</h2>
+              <p className="text-slate-700">Case #2847 - Chest Pain Evaluation</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="bg-background p-6 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Initial Assessment</p>
+            <div className="bg-white p-6 rounded-lg border border-blue-200">
+              <p className="text-sm text-slate-700 mb-2">Initial Assessment</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-semibold text-foreground">{evaluation.initialScore}</span>
-                <span className="text-muted-foreground">/ 100</span>
+                <span className="text-4xl font-bold text-slate-900">{evaluation.initialScore}</span>
+                <span className="text-slate-700">/ 100</span>
               </div>
             </div>
 
-            <div className="bg-background p-6 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Final Assessment</p>
+            <div className="bg-white p-6 rounded-lg border border-blue-200">
+              <p className="text-sm text-slate-700 mb-2">Final Assessment</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-semibold text-[--teal]">{evaluation.finalScore}</span>
-                <span className="text-muted-foreground">/ 100</span>
+                <span className="text-4xl font-bold text-teal-600">{evaluation.finalScore}</span>
+                <span className="text-slate-700">/ 100</span>
               </div>
             </div>
 
-            <div className="bg-background p-6 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Improvement</p>
+            <div className="bg-white p-6 rounded-lg border border-blue-200">
+              <p className="text-sm text-slate-700 mb-2">Improvement</p>
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-green-600" />
-                <span className="text-4xl font-semibold text-green-600">+{evaluation.finalScore - evaluation.initialScore}</span>
+                <span className="text-4xl font-bold text-green-600">+{evaluation.finalScore - evaluation.initialScore}</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Proficiency Level:</span>
-            <Badge className="bg-[--navy] text-white px-4 py-1">{evaluation.proficiency}</Badge>
+            <span className="text-sm text-slate-700">Proficiency Level:</span>
+            <Badge className="bg-[#071C5A] text-white px-4 py-1">{evaluation.proficiency}</Badge>
           </div>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Strengths */}
-          <Card className="p-6">
+          <Card className="p-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow">
+                <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-semibold text-lg">Strengths</h3>
+              <h3 className="font-bold text-lg text-slate-900">Strengths</h3>
             </div>
             <ul className="space-y-3">
               {evaluation.strengths.map((strength, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>{strength}</span>
+                  <span className="text-slate-700">{strength}</span>
                 </li>
               ))}
             </ul>
           </Card>
 
           {/* Areas for Growth */}
-          <Card className="p-6">
+          <Card className="p-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-blue-600" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow">
+                <AlertCircle className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-semibold text-lg">Areas for Growth</h3>
+              <h3 className="font-bold text-lg text-slate-900">Areas for Growth</h3>
             </div>
             <ul className="space-y-3">
               {evaluation.areasForGrowth.map((area, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm">
-                  <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <span>{area}</span>
+                  <AlertCircle className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" />
+                  <span className="text-slate-700">{area}</span>
                 </li>
               ))}
             </ul>
@@ -148,41 +148,46 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
         </div>
 
         {/* Detailed Breakdown */}
-        <Card className="p-6 mb-6">
-          <h3 className="font-semibold text-lg mb-4">Performance Breakdown</h3>
+        <Card className="p-6 mb-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="font-bold text-lg text-slate-900">Performance Breakdown</h3>
+          </div>
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Working Diagnosis</span>
-                <span className="text-sm text-muted-foreground">85%</span>
+                <span className="text-sm font-medium text-slate-900">Working Diagnosis</span>
+                <span className="text-sm text-slate-700">85%</span>
               </div>
               <Progress value={85} className="h-2" />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Differential Reasoning</span>
-                <span className="text-sm text-muted-foreground">78%</span>
+                <span className="text-sm font-medium text-slate-900">Differential Reasoning</span>
+                <span className="text-sm text-slate-700">78%</span>
               </div>
               <Progress value={78} className="h-2" />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Diagnostic Workup</span>
-                <span className="text-sm text-muted-foreground">82%</span>
+                <span className="text-sm font-medium text-slate-900">Diagnostic Workup</span>
+                <span className="text-sm text-slate-700">82%</span>
               </div>
               <Progress value={82} className="h-2" />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Management Planning</span>
-                <span className="text-sm text-muted-foreground">80%</span>
+                <span className="text-sm font-medium text-slate-900">Management Planning</span>
+                <span className="text-sm text-slate-700">80%</span>
               </div>
               <Progress value={80} className="h-2" />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Clinical Communication</span>
-                <span className="text-sm text-muted-foreground">88%</span>
+                <span className="text-sm font-medium text-slate-900">Clinical Communication</span>
+                <span className="text-sm text-slate-700">88%</span>
               </div>
               <Progress value={88} className="h-2" />
             </div>
@@ -190,21 +195,26 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
         </Card>
 
         {/* Full Transcript */}
-        <Card className="p-6">
-          <h3 className="font-semibold text-lg mb-4">Full Conversation Transcript</h3>
+        <Card className="p-6 border border-blue-200 bg-blue-100 shadow-sm rounded-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow">
+              <MessageSquare className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="font-bold text-lg text-slate-900">Full Conversation Transcript</h3>
+          </div>
           <div className="space-y-4">
             {transcript.map((message, index) => (
-              <div key={index} className="border-l-2 border-border pl-4 py-2">
+              <div key={index} className="border-l-2 border-blue-300 pl-4 py-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm font-bold text-slate-900">
                     {message.role === "student" ? "You" : "AI Attending"}
                   </span>
-                  <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                  <span className="text-xs text-slate-600">{message.timestamp}</span>
                 </div>
-                <p className="text-sm text-muted-foreground">{message.content}</p>
+                <p className="text-sm text-slate-700">{message.content}</p>
               </div>
             ))}
-            <Button variant="outline" className="w-full">
+            <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm">
               View Full Transcript
             </Button>
           </div>
@@ -212,7 +222,7 @@ export function EvaluationPage({ onBack, onStartNewCase, onViewProfile }: Evalua
 
         {/* Action Buttons */}
         <div className="flex gap-4 mt-8 justify-center">
-          <Button onClick={onStartNewCase} className="bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-lg">
+          <Button onClick={onStartNewCase} className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white px-8 shadow-lg">
             Start New Case
           </Button>
           <Button variant="outline" onClick={onViewProfile} className="px-8 border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5">

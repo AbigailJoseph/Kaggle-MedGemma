@@ -4,7 +4,7 @@ import { Textarea } from "./ui/textarea";
 import { Card } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
-import { ArrowLeft, Send, ChevronDown, ChevronUp, User, Bot, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Send, ChevronDown, ChevronUp, User, Bot, CheckCircle2, Circle, AlertCircle, FileText, ClipboardList, Brain, Lightbulb, Activity } from "lucide-react";
 
 interface Message {
   id: string;
@@ -159,22 +159,36 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         <aside className="w-80 border-r border-border bg-card p-4 overflow-y-auto">
           <Collapsible open={isCaseSummaryOpen} onOpenChange={setIsCaseSummaryOpen}>
             <CollapsibleTrigger className="flex items-center justify-between w-full mb-4 hover:bg-muted p-2 rounded-lg">
-              <h3 className="font-semibold">Case Summary</h3>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-700 to-indigo-800 flex items-center justify-center shadow">
+                  <ClipboardList className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-bold text-slate-900">Case Summary</h3>
+              </div>
               {isCaseSummaryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4">
               <div>
-                <h4 className="text-sm font-semibold mb-2 text-[--navy]">Patient</h4>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <User className="w-3.5 h-3.5 text-[#071C5A]" />
+                  <h4 className="text-sm font-bold text-slate-900">Patient</h4>
+                </div>
                 <p className="text-sm text-muted-foreground">89-year-old male — Case 12-2010</p>
               </div>
 
               <div>
-                <h4 className="text-sm font-semibold mb-2 text-[--navy]">Chief Complaint</h4>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <FileText className="w-3.5 h-3.5 text-[#071C5A]" />
+                  <h4 className="text-sm font-bold text-slate-900">Chief Complaint</h4>
+                </div>
                 <p className="text-sm text-muted-foreground">Progressive dyspnea × 6 months, acutely worse × 3 days</p>
               </div>
 
               <div>
-                <h4 className="text-sm font-semibold mb-2 text-[--navy]">Key Findings</h4>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Activity className="w-3.5 h-3.5 text-red-500" />
+                  <h4 className="text-sm font-bold text-slate-900">Key Findings</h4>
+                </div>
                 <ul className="space-y-1 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <AlertCircle className="w-3 h-3 text-red-500 mt-0.5" />
@@ -200,7 +214,10 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
               </div>
 
               <div>
-                <h4 className="text-sm font-semibold mb-2 text-[--navy]">PMH</h4>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <ClipboardList className="w-3.5 h-3.5 text-[#071C5A]" />
+                  <h4 className="text-sm font-bold text-slate-900">PMH</h4>
+                </div>
                 <ul className="space-y-1 text-sm text-muted-foreground">
                   <li>• CAD, complete heart block (dual pacemaker)</li>
                   <li>• DM, HTN, hyperlipidemia, CVD</li>
@@ -228,19 +245,19 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                 className={`flex gap-4 ${message.role === "student" ? "justify-end" : "justify-start"}`}
               >
                 {message.role === "attending" && (
-                  <div className="w-10 h-10 rounded-full bg-[--navy] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#071C5A] ring-2 ring-blue-300 flex items-center justify-center flex-shrink-0">
                     <Bot className="w-5 h-5 text-white" />
                   </div>
                 )}
                 <div
                   className={`max-w-2xl rounded-lg p-4 ${
                     message.role === "student"
-                      ? "bg-[--teal]/10 border border-[--teal]/20"
+                      ? "bg-teal-100 border-2 border-teal-400"
                       : "bg-card border border-border"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-sm">
+                    <span className="font-bold text-sm text-slate-900">
                       {message.role === "student" ? "You" : "AI Attending"}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -250,7 +267,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 </div>
                 {message.role === "student" && (
-                  <div className="w-10 h-10 rounded-full bg-[--teal] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-teal-500 ring-2 ring-teal-300 flex items-center justify-center flex-shrink-0">
                     <User className="w-5 h-5 text-white" />
                   </div>
                 )}
@@ -258,7 +275,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
             ))}
             {isLoading && (
               <div className="flex gap-4 justify-start">
-                <div className="w-10 h-10 rounded-full bg-[--navy] flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#071C5A] ring-2 ring-blue-300 flex items-center justify-center flex-shrink-0">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-2">
@@ -305,7 +322,12 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
 
         {/* Right Sidebar - Clinical Reasoning Tracker */}
         <aside className="w-80 border-l border-border bg-card p-4 overflow-y-auto">
-          <h3 className="font-semibold mb-4">Clinical Reasoning Tracker</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow">
+              <Brain className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="font-bold text-slate-900">Clinical Reasoning Tracker</h3>
+          </div>
           
           <div className="space-y-6">
             <div>
@@ -316,7 +338,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                   ) : (
                     <Circle className="w-4 h-4 text-muted-foreground" />
                   )}
-                  <span className="text-sm font-semibold">Working Diagnosis</span>
+                  <span className="text-sm font-bold text-slate-900">Working Diagnosis</span>
                 </div>
                 <span className="text-xs text-muted-foreground">{reasoningProgress.workingDiagnosis}%</span>
               </div>
@@ -331,7 +353,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                   ) : (
                     <Circle className="w-4 h-4 text-muted-foreground" />
                   )}
-                  <span className="text-sm font-semibold">Differential</span>
+                  <span className="text-sm font-bold text-slate-900">Differential</span>
                 </div>
                 <span className="text-xs text-muted-foreground">{reasoningProgress.differential}%</span>
               </div>
@@ -346,7 +368,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                   ) : (
                     <Circle className="w-4 h-4 text-muted-foreground" />
                   )}
-                  <span className="text-sm font-semibold">Diagnostic Workup</span>
+                  <span className="text-sm font-bold text-slate-900">Diagnostic Workup</span>
                 </div>
                 <span className="text-xs text-muted-foreground">{reasoningProgress.diagnosticWorkup}%</span>
               </div>
@@ -361,7 +383,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                   ) : (
                     <Circle className="w-4 h-4 text-muted-foreground" />
                   )}
-                  <span className="text-sm font-semibold">Management Plan</span>
+                  <span className="text-sm font-bold text-slate-900">Management Plan</span>
                 </div>
                 <span className="text-xs text-muted-foreground">{reasoningProgress.managementPlan}%</span>
               </div>
@@ -376,7 +398,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
                   ) : (
                     <Circle className="w-4 h-4 text-muted-foreground" />
                   )}
-                  <span className="text-sm font-semibold">Logical Reasoning</span>
+                  <span className="text-sm font-bold text-slate-900">Logical Reasoning</span>
                 </div>
                 <span className="text-xs text-muted-foreground">{reasoningProgress.logicalReasoning}%</span>
               </div>
@@ -384,19 +406,24 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
             </div>
           </div>
 
-          <Card className="mt-6 p-4 bg-[--navy]/5 border-[--navy]/20">
-            <h4 className="text-sm font-semibold mb-2">Tips</h4>
-            <ul className="space-y-2 text-xs text-muted-foreground">
+          <Card className="mt-6 p-4 bg-amber-50 border border-amber-200">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow">
+                <Lightbulb className="w-4 h-4 text-white" />
+              </div>
+              <h4 className="text-sm font-bold text-amber-900">Tips</h4>
+            </div>
+            <ul className="space-y-2 text-xs text-amber-800">
               <li className="flex items-start gap-2">
-                <span className="text-[--teal]">•</span>
+                <span className="text-amber-500">•</span>
                 <span>Support your reasoning with specific clinical findings</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[--teal]">•</span>
+                <span className="text-amber-500">•</span>
                 <span>Consider alternative diagnoses and explain why they're less likely</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[--teal]">•</span>
+                <span className="text-amber-500">•</span>
                 <span>Prioritize immediate life-threatening conditions</span>
               </li>
             </ul>

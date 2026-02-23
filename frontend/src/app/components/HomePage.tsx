@@ -68,42 +68,42 @@ export function HomePage({ onStartTraining, onSignIn, isSignedIn, profileName, p
 
         {/* How It Works */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-20">
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <div className="w-12 h-12 bg-[--navy]/10 rounded-lg flex items-center justify-center mb-4">
-              <Stethoscope className="w-6 h-6 text-[--navy]" />
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-800 flex items-center justify-center mb-4 shadow">
+              <Stethoscope className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">1. Review the Case</h3>
-            <p className="text-muted-foreground text-sm">
+            <h3 className="text-lg font-bold mb-2 text-slate-900">1. Review the Case</h3>
+            <p className="text-slate-700 text-sm">
               Examine patient vitals, symptoms, labs, and history in a structured format.
             </p>
           </div>
 
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <div className="w-12 h-12 bg-[--teal]/10 rounded-lg flex items-center justify-center mb-4">
-              <Brain className="w-6 h-6 text-[--teal]" />
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center mb-4 shadow">
+              <Brain className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">2. Present Your Diagnosis</h3>
-            <p className="text-muted-foreground text-sm">
+            <h3 className="text-lg font-bold mb-2 text-slate-900">2. Present Your Diagnosis</h3>
+            <p className="text-slate-700 text-sm">
               Submit your structured presentation, differential, and management plan.
             </p>
           </div>
 
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <div className="w-12 h-12 bg-[--navy]/10 rounded-lg flex items-center justify-center mb-4">
-              <MessageSquare className="w-6 h-6 text-[--navy]" />
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center mb-4 shadow">
+              <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">3. Receive Feedback</h3>
-            <p className="text-muted-foreground text-sm">
+            <h3 className="text-lg font-bold mb-2 text-slate-900">3. Receive Feedback</h3>
+            <p className="text-slate-700 text-sm">
               Engage with Socratic questions and expert guidance to deepen your reasoning.
             </p>
           </div>
 
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <div className="w-12 h-12 bg-[--teal]/10 rounded-lg flex items-center justify-center mb-4">
-              <TrendingUp className="w-6 h-6 text-[--teal]" />
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4 shadow">
+              <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">4. Track Progress</h3>
-            <p className="text-muted-foreground text-sm">
+            <h3 className="text-lg font-bold mb-2 text-slate-900">4. Track Progress</h3>
+            <p className="text-slate-700 text-sm">
               Get detailed evaluations and monitor your clinical reasoning improvement.
             </p>
           </div>
