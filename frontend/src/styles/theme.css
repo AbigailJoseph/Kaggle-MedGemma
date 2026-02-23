@@ -2,13 +2,13 @@
 
 :root {
   --font-size: 16px;
-  --background: #f8f9fa;
+  --background: transparent;
   --foreground: #1a202c;
   --card: #ffffff;
   --card-foreground: #1a202c;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #1e3a8a;
+  --primary: #071C5A;
   --primary-foreground: #ffffff;
   --secondary: #14b8a6;
   --secondary-foreground: #ffffff;
@@ -129,7 +129,9 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(160deg, #bec6f9 0%, #92DFF3 50%, #B7E9F7 100%);
+    min-height: 100vh;
   }
 
   /**
