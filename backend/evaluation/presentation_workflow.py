@@ -61,6 +61,7 @@ EVALUATION METRICS FOR MEDICAL CASE PRESENTATIONS:
 class EvalState:
     interaction_count: int = 0
     max_interactions: int = 15
+    initial_presentation: str = ""
     # metric_id -> {name, status, confidence}
     metrics_status: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     conversation_history: List[Dict[str, Any]] = field(default_factory=list)
@@ -94,6 +95,7 @@ class PresentationWorkflow:
     ) -> Dict[str, Any]:
         self.reset()
         self.state.interaction_count = 0
+        self.state.initial_presentation = student_presentation
 
         evaluation = self._evaluate_presentation(
             student_presentation,
@@ -134,11 +136,10 @@ class PresentationWorkflow:
     ) -> Dict[str, Any]:
         self.state.interaction_count += 1
 
-        # attach answer to last unanswered question
+        # attach answer to all currently unanswered questions (student replies to the batch)
         for turn in self.state.conversation_history:
             if turn["answer"] is None:
                 turn["answer"] = student_answer
-                break
 
         # Re-evaluate the *current* presentation state as:
         # original presentation + conversation so far (simple and robust)
@@ -205,12 +206,7 @@ class PresentationWorkflow:
     # ---------------- internal helpers ----------------
 
     def _stitch_presentation(self) -> str:
-        parts = []
-        if self.state.initial_evaluation:
-            # don't rely on this, but keep structure stable
-            pass
-        # First thing in history is initial "presentation" question(s),
-        # but we only store Q/A. We'll stitch Q/A pairs.
+        parts = [self.state.initial_presentation]
         for t in self.state.conversation_history:
             if t.get("question") and t.get("answer"):
                 parts.append(f"Q: {t['question']}\nA: {t['answer']}")
