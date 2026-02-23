@@ -1,4 +1,6 @@
 from pipeline.pipeline import ClinicalTutoringPipeline
+from dotenv import load_dotenv
+load_dotenv()
 
 def main():
     pipeline = ClinicalTutoringPipeline()
