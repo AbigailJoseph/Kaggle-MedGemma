@@ -137,15 +137,15 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-blue-700 bg-blue-600">
         <div className="max-w-[2000px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
+            <Button variant="ghost" onClick={onBack} className="gap-2 text-white hover:bg-white/10 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <div className="h-6 w-px bg-border" />
-            <h2 className="text-lg font-semibold">Case Discussion</h2>
+            <div className="h-6 w-px bg-white/30" />
+            <h2 className="text-lg font-semibold text-white">Case Discussion</h2>
           </div>
           <Button onClick={onComplete} className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg">
             Complete Case
