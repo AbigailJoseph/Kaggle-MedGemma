@@ -15,50 +15,60 @@ from openai import OpenAI
 METRICS_RUBRIC = """
 EVALUATION METRICS FOR MEDICAL CASE PRESENTATIONS:
 
+GRADING PHILOSOPHY — be fair, not perfect. Students do not need to use ideal phrasing
+or cover every sub-point. "Met" means the student demonstrated reasonable competency in
+the area. "Partial" means they addressed it but missed something meaningful. "Missing"
+means the concept was not addressed at all. Do not penalize for brevity if the substance
+is present.
+
     1. FOCUSED, RELEVANT INFORMATION SELECTION (MOST IMPORTANT)
-       - Includes only details that support their diagnosis
-       - Omits extraneous information that doesn't impact reasoning
-       - Shows diagnostic thinking, not passive reporting
-    
+       - MET if: student's presentation is clearly filtered toward their working diagnosis
+         (doesn't have to be perfect, just demonstrates active selection)
+       - PARTIAL if: student includes mostly relevant details but also some unnecessary ones
+       - MISSING if: student recites all available facts with no apparent filtering
+
     2. CLEAR STATEMENT OF WORKING DIAGNOSIS
-       - States hypothesis early in presentation
-       - Justifies with structured data
-       - Shows confidence and synthesis ability
-    
+       - MET if: student explicitly names a working diagnosis and briefly justifies it
+       - PARTIAL if: student names a diagnosis but provides no supporting rationale,
+         OR implies it through workup without stating it
+       - MISSING if: no diagnosis or diagnostic direction is mentioned
+
     3. LOGICAL ORGANIZATION + CLINICAL REASONING
-       - Explains how symptoms → reasoning → diagnosis connect
-       - Uses "why" statements to connect findings to hypotheses
-       - Demonstrates proper clinical reasoning flow
-    
+       - MET if: student connects findings to their reasoning (even a single "because" or
+         "given X, I think Y" counts)
+       - PARTIAL if: student lists findings and a diagnosis but does not link them
+       - MISSING if: presentation is a disorganized data dump with no reasoning shown
+
     4. INCLUSION OF PRIORITIZED DIFFERENTIAL DIAGNOSIS
-       - Provides alternative diagnoses considered
-       - Prioritizes differentials logically
-       - Avoids unfocused long lists
-    
+       - MET if: student names at least one alternative diagnosis with some rationale
+       - PARTIAL if: student lists alternatives but with no ordering or reasoning
+       - MISSING if: no alternative diagnoses are mentioned
+
     5. CONCISENESS + EFFICIENT DELIVERY
-       - Presentation is short (few minutes)
-       - Well-structured and purposeful
-       - No wandering or unfocused content
-    
+       - MET if: presentation is reasonably concise and structured
+       - PARTIAL if: noticeably verbose or repetitive but still coherent
+       - MISSING if: severely disorganized or filled with irrelevant content
+
     6. PRIORITIZED, RATIONAL DIAGNOSTIC WORKUP PLAN
-       - Identifies which initial tests are needed first
-       - Explains why tests matter and how they change management
-       - Shows understanding of test prioritization
-    
+       - MET if: student names relevant tests and explains why they matter or what order
+       - PARTIAL if: student lists tests but gives no prioritization or rationale
+       - MISSING if: no workup plan is mentioned
+
     7. PRIORITIZED MANAGEMENT PLAN AND DISPOSITION
-       - Management is ordered and justified
-       - Avoids unnecessary tests
-       - Links decisions back to diagnosis
-    
+       - MET if: student outlines a reasonable management approach with some ordering
+       - PARTIAL if: student mentions treatment/disposition but it is incomplete or unordered
+       - MISSING if: no management or disposition is mentioned
+
     8. EVIDENCE OF HYPOTHESIS-DRIVEN INQUIRY
-       - Shows clear working hypothesis
-       - Knows which information matters
-       - Each piece of plan flows from hypothesis
-    
+       - MET if: student's plan or questions clearly flow from their stated hypothesis
+       - PARTIAL if: student has a hypothesis but the workup/plan doesn't obviously follow from it
+       - MISSING if: no discernible hypothesis is driving the student's approach
+
     9. ABILITY TO SYNTHESIZE (NOT JUST REPORT)
-       - Provides summary statements
-       - Distills key clues
-       - Shows clear pivot from data → meaning
+       - MET if: student offers a summary statement or interpretation that goes beyond
+         listing facts (e.g. "this presentation is most consistent with X because...")
+       - PARTIAL if: student states a conclusion but doesn't connect it to the data
+       - MISSING if: student only lists findings with no interpretation
 """.strip()
 
 
@@ -258,7 +268,12 @@ STUDENT TEXT TO EVALUATE:
 {student_text}
 ---
 
-Evaluate against ALL 9 metrics. For each metric return:
+Evaluate against ALL 9 metrics using the GRADING PHILOSOPHY above.
+Award "met" when the student demonstrates reasonable competency in the area — they do not
+need to be exhaustive or perfectly worded. Use "partial" when they addressed the concept
+but missed something meaningful. Use "missing" only when the concept is absent entirely.
+
+For each metric return:
 - status: "met", "partial", "missing", or "misconception"
 - confidence: 0.0 to 1.0
 - evidence: short quote/observation
