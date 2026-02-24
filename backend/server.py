@@ -77,6 +77,7 @@ class FinalizeResponse(BaseModel):
 
 
 def _ensure_firebase_admin_initialized() -> None:
+    """Initialize Firebase Admin SDK exactly once for token verification."""
     if firebase_admin is None or firebase_auth is None:
         raise HTTPException(
             status_code=500,
@@ -107,6 +108,7 @@ def _ensure_firebase_admin_initialized() -> None:
 
 
 def _get_uid_from_bearer(authorization: Optional[str]) -> str:
+    """Validate bearer token and return the authenticated Firebase UID."""
     if not authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization header.")
     if not authorization.startswith("Bearer "):
@@ -131,6 +133,7 @@ def _get_uid_from_bearer(authorization: Optional[str]) -> str:
 
 
 def _get_session_for_user(session_id: str, uid: str) -> ClinicalTutoringPipeline:
+    """Fetch a session and enforce user-level ownership."""
     entry = sessions.get(session_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Session not found. Please start a new session.")
@@ -141,6 +144,7 @@ def _get_session_for_user(session_id: str, uid: str) -> ClinicalTutoringPipeline
 
 @app.post("/api/session/start", response_model=StartResponse)
 def start_session(authorization: Optional[str] = Header(default=None)):
+    """Create a new authenticated tutoring session and return its ID."""
     uid = _get_uid_from_bearer(authorization)
 
     session_id = str(uuid.uuid4())
@@ -152,6 +156,7 @@ def start_session(authorization: Optional[str] = Header(default=None)):
 
 @app.post("/api/session/message", response_model=MessageResponse)
 def send_message(body: MessageRequest, authorization: Optional[str] = Header(default=None)):
+    """Process one student message and return coaching + metric status."""
     uid = _get_uid_from_bearer(authorization)
     pipeline = _get_session_for_user(body.session_id, uid)
 
@@ -169,6 +174,7 @@ def send_message(body: MessageRequest, authorization: Optional[str] = Header(def
 
 @app.post("/api/session/finalize", response_model=FinalizeResponse)
 def finalize_session(body: FinalizeRequest, authorization: Optional[str] = Header(default=None)):
+    """Return final summary for an authenticated tutoring session."""
     uid = _get_uid_from_bearer(authorization)
     pipeline = _get_session_for_user(body.session_id, uid)
 

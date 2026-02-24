@@ -1,3 +1,5 @@
+"""Utilities to structure student free-text into symptoms and differential diagnoses."""
+
 import json
 import os
 from pathlib import Path
@@ -26,10 +28,19 @@ class StudentInputParser:
     """
 
     def __init__(self):
+        """Initialize OpenAI client for deterministic extraction."""
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     def parse(self, text: str) -> dict:
+        """Parse student text into canonical symptom and diagnosis fields.
+
+        Returns:
+            Dict with keys:
+            - present: validated symptom names explicitly present.
+            - absent: validated symptom names explicitly absent.
+            - diagnoses: student-provided diagnosis strings (unfiltered).
+        """
         resp = self.client.chat.completions.create(
             model=self.model,
             messages=[

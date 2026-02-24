@@ -28,12 +28,14 @@ class DiagnosisEvaluator:
     """
 
     def canonicalize(self, diagnosis: Optional[str]) -> Optional[str]:
+        """Map user-facing diagnosis text to the Bayes node name when possible."""
         if not diagnosis:
             return None
         key = diagnosis.strip().lower()
         return DX_ALIASES.get(key, diagnosis)
 
     def probability(self, bayes_net: Any, diagnosis: str) -> float:
+        """Return posterior probability for a diagnosis using supported net APIs."""
         dx = self.canonicalize(diagnosis)
         if dx is None:
             return 0.0

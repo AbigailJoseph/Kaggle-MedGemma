@@ -1,4 +1,5 @@
-# evaluation/presentation_workflow.py
+"""Presentation evaluation workflow for iterative coaching over 9 rubric metrics."""
+
 import json
 import os
 from pathlib import Path
@@ -74,6 +75,7 @@ is present.
 
 @dataclass
 class EvalState:
+    """Mutable workflow state tracked across follow-up interactions."""
     interaction_count: int = 0
     max_interactions: int = 15
     initial_presentation: str = ""
@@ -93,11 +95,13 @@ class PresentationWorkflow:
     """
 
     def __init__(self, model: Optional[str] = None):
+        """Initialize OpenAI client and in-memory state."""
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self.state = EvalState()
 
     def reset(self):
+        """Clear workflow state for a new presentation session."""
         self.state = EvalState()
 
     def evaluate_initial(
@@ -108,6 +112,7 @@ class PresentationWorkflow:
         bayes_summary: Dict[str, Any],
         medgemma_packet: str,
     ) -> Dict[str, Any]:
+        """Evaluate the initial student presentation and generate first questions."""
         self.reset()
         self.state.interaction_count = 0
         self.state.initial_presentation = student_presentation
@@ -149,6 +154,7 @@ class PresentationWorkflow:
         bayes_summary: Dict[str, Any],
         medgemma_packet: str,
     ) -> Dict[str, Any]:
+        """Process a student follow-up response and continue rubric tracking."""
         self.state.interaction_count += 1
 
         # attach answer to all currently unanswered questions (student replies to the batch)
@@ -208,6 +214,7 @@ class PresentationWorkflow:
         }
 
     def final_summary(self) -> Dict[str, Any]:
+        """Return aggregate evaluation progress and conversation history."""
         met = sum(1 for m in self.state.metrics_status.values() if m["status"] == "met")
         total = len(self.state.metrics_status) if self.state.metrics_status else 9
         return {
@@ -221,6 +228,7 @@ class PresentationWorkflow:
     # ---------------- internal helpers ----------------
 
     def _stitch_presentation(self) -> str:
+        """Combine initial presentation with answered Q/A turns for reevaluation."""
         parts = [self.state.initial_presentation]
         for t in self.state.conversation_history:
             if t.get("question") and t.get("answer"):
@@ -228,6 +236,7 @@ class PresentationWorkflow:
         return "\n\n".join(parts).strip()
 
     def _hydrate_metrics_status(self, evaluation: Dict[str, Any]) -> None:
+        """Update metric snapshot from the latest evaluator payload."""
         # Build/update metrics_status snapshot
         ms: Dict[str, Dict[str, Any]] = {}
         for e in evaluation.get("evaluations", []):
@@ -248,6 +257,7 @@ class PresentationWorkflow:
         bayes_summary: Dict[str, Any],
         medgemma_packet: str,
     ) -> Dict[str, Any]:
+        """Run rubric grading with OpenAI and parse the JSON response."""
         prompt = f"""
 You are an expert medical attending physician evaluating a student's case presentation.
 
@@ -315,6 +325,7 @@ Return format:
         medgemma_packet: str,
         conversation_history: List[Dict[str, Any]],
     ) -> List[str]:
+        """Generate targeted Socratic follow-up questions for current gaps."""
         history_text = "\n".join(
             [f"Q: {t['question']}\nA: {t.get('answer','')}" for t in conversation_history if t.get("question")]
         ).strip() or "None."

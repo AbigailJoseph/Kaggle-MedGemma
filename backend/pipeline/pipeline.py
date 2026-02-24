@@ -1,4 +1,4 @@
-# pipeline/pipeline.py
+"""Core tutoring pipeline that orchestrates parsing, inference, evaluation, and coaching."""
 
 from typing import Dict, Any, List, Tuple
 from pathlib import Path
@@ -52,6 +52,7 @@ def build_bayes_summary(
     evidence: Dict[str, bool],
     top_k: int = 5,
 ) -> Dict[str, Any]:
+    """Build a serializable evidence + ranked differential summary for downstream models."""
 
     ranked: List[Tuple[str, float]] = net.rank_diseases()
 
@@ -81,6 +82,7 @@ def build_bayes_summary(
 # ----------------------------
 
 def build_medgemma_prompt(bayes_summary: Dict[str, Any]) -> str:
+    """Create the grounded MedGemma prompt using case narrative and Bayes outputs."""
     return f"""
 You are MedGemma. Create a concise, structured teaching brief using ONLY the provided information.
 Do NOT invent patient facts. If something is missing, say it is missing.
@@ -107,8 +109,10 @@ Keep it short and structured.
 # ----------------------------
 
 class ClinicalTutoringPipeline:
+    """Stateful turn-based workflow for one tutoring session."""
 
     def __init__(self):
+        """Initialize inference, parsing, evaluation, and coaching components."""
         self.bayes_net = NoisyORBayesNet(PULMONARY_NETWORK_DATA)
         self.state = ConversationState()
 
@@ -119,6 +123,7 @@ class ClinicalTutoringPipeline:
 
     # STEP
     def step(self, student_input: str) -> str:
+        """Process one student turn and return attending feedback."""
 
         # ---- FIRST TURN: RUN BAYES + MEDGEMMA + INITIAL EVALUATION ----
         if self.state.turn_number == 0:
@@ -194,6 +199,7 @@ class ClinicalTutoringPipeline:
 
     # FINAL REPORT
     def final_evaluation(self) -> str:
+        """Return a compact terminal-friendly summary of final performance."""
         summary = self.presentation_workflow.final_summary()
 
         return (

@@ -1,3 +1,5 @@
+"""Conversation state container shared across tutoring pipeline turns."""
+
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 

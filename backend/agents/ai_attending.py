@@ -1,3 +1,5 @@
+"""Conversational AI attending that coaches students turn-by-turn."""
+
 import os
 from pathlib import Path
 from typing import Dict, Any, List
@@ -28,6 +30,8 @@ Output format every time (strict):
 
 
 class AIAttending:
+    """Wrapper around OpenAI chat completions for attending-style feedback."""
+
     def __init__(self, model: str = None):
         if OpenAI is None:
             raise RuntimeError("openai package not installed. Run: pip install openai")
@@ -38,10 +42,12 @@ class AIAttending:
         self._history: List[Dict[str, str]] = []
 
     def initial_message(self, bayes_summary: Dict[str, Any], medgemma_packet: str) -> str:
+        """Generate a first-turn kickoff message before student input."""
         context = self._make_context(bayes_summary, medgemma_packet, student_state={"turn_number": 0})
         return self._chat(context, user_message="(Start the session.)")
 
     def respond(self, state, student_input: str, diagnosis_supported: bool) -> str:
+        """Generate attending feedback for a student's current turn."""
         student_state = {
             "turn_number": state.turn_number,
             "student_diagnoses": state.student_diagnoses,
@@ -52,6 +58,7 @@ class AIAttending:
         return self._chat(context, user_message=student_input)
 
     def _make_context(self, bayes_summary, medgemma_packet, student_state, eval_packet=None) -> str:
+        """Build the developer-context block passed to the LLM each turn."""
         return f"""BAYES_NET_SUMMARY:
 {bayes_summary}
 
@@ -69,6 +76,7 @@ STUDENT_STATE:
 """
 
     def _chat(self, context: str, user_message: str) -> str:
+        """Call OpenAI chat completions and persist conversation history."""
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             # Developer block is rebuilt each turn with the latest Bayes/eval state
