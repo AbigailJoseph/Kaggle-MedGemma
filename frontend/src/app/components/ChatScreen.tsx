@@ -253,15 +253,18 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   };
 
   const toScore = (evaluations?: EvaluationMetric[], fallbackMetrics?: Record<string, MetricsStatusItem>) => {
-    if (evaluations?.length) {
-      const metCount = evaluations.filter((item) => item.status === "met").length;
-      return Math.round((metCount / evaluations.length) * 100);
-    }
-    if (fallbackMetrics && Object.keys(fallbackMetrics).length) {
-      const items = Object.values(fallbackMetrics);
-      const metCount = items.filter((item) => item.status === "met").length;
-      return Math.round((metCount / items.length) * 100);
-    }
+    const scoreItems = (items: { status: string }[]) =>
+      Math.round(
+        (items.reduce((sum, item) => {
+          if (item.status === "met") return sum + 1;
+          if (item.status === "partial") return sum + 0.5;
+          return sum;
+        }, 0) /
+          items.length) *
+          100,
+      );
+    if (evaluations?.length) return scoreItems(evaluations);
+    if (fallbackMetrics && Object.keys(fallbackMetrics).length) return scoreItems(Object.values(fallbackMetrics));
     return 0;
   };
 
