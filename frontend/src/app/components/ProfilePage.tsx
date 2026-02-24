@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
-import { ArrowLeft, Award, Trophy, TrendingUp, Calendar, CheckCircle2, Flame, Clock, BookOpen, Star, Target, Zap, Activity } from "lucide-react";
+import { ArrowLeft, Award, Trophy, TrendingUp, Calendar, CheckCircle2, Flame, Clock, BookOpen, Star, Target, Zap } from "lucide-react";
 
 interface ProfilePageProps {
   onBack: () => void;
@@ -35,7 +35,7 @@ interface ProfilePageProps {
   }>;
 }
 
-export function ProfilePage({ onBack, onStartNewCase, onViewCase, onSignOut, profile, recentCases, specialtyStats }: ProfilePageProps) {
+export function ProfilePage({ onBack, onStartNewCase, onViewCase, onSignOut, profile, recentCases }: ProfilePageProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
   const hasPerfectCase = recentCases.some((case_) => case_.score >= 100);
@@ -274,35 +274,6 @@ export function ProfilePage({ onBack, onStartNewCase, onViewCase, onSignOut, pro
               <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-600">No completed cases yet.</p>
               <p className="text-xs text-slate-600 mt-1">Start a case to see your training history here.</p>
-            </div>
-          )}
-        </Card>
-
-        <Card className="p-6 mb-6 shadow-sm border border-blue-200 bg-blue-100">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="font-bold text-xl text-slate-900">Specialty Stats</h3>
-          </div>
-          {specialtyStats.length > 0 ? (
-            <div className="space-y-4">
-              {specialtyStats.map((specialty) => (
-                <div key={specialty.name}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{specialty.name}</p>
-                      <p className="text-xs text-slate-600">{specialty.cases} cases</p>
-                    </div>
-                    <span className="text-sm font-semibold text-[#071C5A]">{specialty.avgScore}%</span>
-                  </div>
-                  <Progress value={specialty.avgScore} className="h-2.5" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-sm text-slate-600 text-center">
-              No specialty stats yet. Complete cases to populate this section.
             </div>
           )}
         </Card>

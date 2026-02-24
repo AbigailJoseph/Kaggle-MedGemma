@@ -218,7 +218,7 @@ export default function App() {
 
     const unsubscribe = onSnapshot(casesQuery, (snapshot) => {
       const items = snapshot.docs.map((item) => {
-        const data = item.data();
+        const data = item.data({ serverTimestamps: "estimate" });
         const completedAt = data.completedAt?.toDate ? data.completedAt.toDate() : null;
         return {
           id: item.id,
@@ -343,40 +343,32 @@ export default function App() {
     setCurrentScreen("chat");
   };
 
-  const handleCompleteCase = async (payload: CompletedCasePayload) => {
+  const handleCompleteCase = (payload: CompletedCasePayload) => {
     setLatestEvaluation(payload);
     setEvaluationBackScreen("chat");
-
-    if (!authUser) {
-      setCurrentScreen("evaluation");
-      return;
-    }
-
-    try {
-      const specialty = "Pulmonology";
-      const caseTitle = "Progressive Dyspnea Case";
-
-      await addDoc(collection(db, "users", authUser.uid, "cases"), {
-        title: caseTitle,
-        specialty,
-        score: payload.score,
-        initialScore: payload.initialScore,
-        proficiency: payload.proficiency,
-        strengths: payload.strengths,
-        areasForGrowth: payload.areasForGrowth,
-        performanceBreakdown: payload.performanceBreakdown,
-        transcript: payload.transcript,
-        turnsToMeetAllMetrics: payload.turnsToMeetAllMetrics,
-        durationMinutes: payload.durationMinutes,
-        presentation,
-        completedAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Failed to save completed case:", error);
-    }
-
     setCurrentScreen("evaluation");
+
+    if (!authUser) return;
+
+    const specialty = "Pulmonology";
+    const caseTitle = "Progressive Dyspnea Case";
+
+    void addDoc(collection(db, "users", authUser.uid, "cases"), {
+      title: caseTitle,
+      specialty,
+      score: payload.score,
+      initialScore: payload.initialScore,
+      proficiency: payload.proficiency,
+      strengths: payload.strengths,
+      areasForGrowth: payload.areasForGrowth,
+      performanceBreakdown: payload.performanceBreakdown,
+      transcript: payload.transcript,
+      turnsToMeetAllMetrics: payload.turnsToMeetAllMetrics,
+      durationMinutes: payload.durationMinutes,
+      presentation,
+      completedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+    }).catch((error) => console.error("Failed to save completed case:", error));
   };
 
   const handleViewCaseFromProfile = (caseId: string) => {

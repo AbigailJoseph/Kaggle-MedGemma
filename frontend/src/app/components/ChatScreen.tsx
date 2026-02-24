@@ -283,15 +283,44 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
   };
 
   const handleCompleteCase = async () => {
-    if (!sessionId || isFinalizing) return;
+    if (isFinalizing) return;
     setIsFinalizing(true);
     setError(null);
+
+    if (!sessionId) {
+      const durationMinutes = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 60000));
+      const transcript = messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+        timestamp: message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }));
+      const finalScore = toScore(undefined, metricsStatus);
+      const proficiency = finalScore >= 85 ? "Advanced" : finalScore >= 70 ? "Proficient" : "Beginner";
+      onComplete({
+        score: finalScore,
+        initialScore: finalScore,
+        proficiency,
+        strengths: [],
+        areasForGrowth: [],
+        performanceBreakdown: toBreakdown(metricsStatus),
+        transcript,
+        turnsToMeetAllMetrics: null,
+        durationMinutes,
+      });
+      setIsFinalizing(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+    const abortTimeout = setTimeout(() => abortController.abort(), 8000);
 
     try {
       const finalizeRes = await authedFetch("/api/session/finalize", {
         method: "POST",
         body: JSON.stringify({ session_id: sessionId }),
+        signal: abortController.signal,
       });
+      clearTimeout(abortTimeout);
       if (!finalizeRes.ok) throw new Error(`Server error ${finalizeRes.status}`);
       const finalizeData: SessionFinalizeResponse = await finalizeRes.json();
 
@@ -336,6 +365,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
         durationMinutes,
       });
     } catch {
+      clearTimeout(abortTimeout);
       const durationMinutes = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 60000));
       const transcript = messages.map((message) => ({
         role: message.role,
@@ -374,7 +404,7 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
             <div className="h-6 w-px bg-white/30" />
             <h2 className="text-lg font-semibold text-white">Case Discussion</h2>
           </div>
-          <Button onClick={handleCompleteCase} disabled={!sessionId || isFinalizing} className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg">
+          <Button onClick={handleCompleteCase} disabled={isFinalizing} className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg">
             Complete Case
           </Button>
         </div>
