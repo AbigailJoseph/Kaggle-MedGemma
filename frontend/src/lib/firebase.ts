@@ -1,3 +1,8 @@
+/**
+ * Firebase client initialization shared across the frontend app.
+ *
+ * Environment variables are provided by Vite (`VITE_*`).
+ */
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -14,6 +19,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+// Export singleton service instances for auth and persistence.
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();

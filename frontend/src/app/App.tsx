@@ -1,3 +1,11 @@
+/**
+ * App shell and local router for the MedGemma training UI.
+ *
+ * Responsibilities:
+ * - Manage auth state and user profile hydration from Firebase.
+ * - Persist completed case evaluations to Firestore.
+ * - Route between home/case/chat/evaluation/profile screens.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
 import {
@@ -72,6 +80,7 @@ const defaultStats = {
 };
 
 function getIdentityFromAuth(user: User): { name: string; email: string; photoURL: string } {
+  // Prefer Google provider profile values, with graceful fallbacks.
   const providerProfile = user.providerData.find((p) => p?.providerId === "google.com");
   const email = user.email ?? providerProfile?.email ?? "";
   const nameFromEmail = email.includes("@") ? email.split("@")[0] : "";
@@ -84,6 +93,7 @@ function getIdentityFromAuth(user: User): { name: string; email: string; photoUR
 }
 
 function toUserProfile(user: User, data: DocumentData | undefined): UserProfile {
+  // Merge identity from auth with persisted profile statistics.
   const identity = getIdentityFromAuth(user);
 
   return {
@@ -99,12 +109,14 @@ function toUserProfile(user: User, data: DocumentData | undefined): UserProfile 
 }
 
 function profileLevelFromScore(score: number): string {
+  // Shared proficiency bucketing used for profile display and case history.
   if (score >= 85) return "Advanced";
   if (score >= 70) return "Proficient";
   return "Beginner";
 }
 
 function toLocalDateKey(date: Date): string {
+  // Stable yyyy-mm-dd key to compute streaks by local calendar day.
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -112,6 +124,7 @@ function toLocalDateKey(date: Date): string {
 }
 
 function computeCurrentStreak(cases: CaseRecord[]): number {
+  // Count contiguous completion days ending today (or yesterday if no case today).
   const dayKeys = new Set(
     cases
       .map((item) => item.completedAt)
@@ -144,6 +157,7 @@ function computeCurrentStreak(cases: CaseRecord[]): number {
 }
 
 export default function App() {
+  // Screen state acts as a lightweight local router.
   const [currentScreen, setCurrentScreen] = useState<Screen>("home");
   const [presentation, setPresentation] = useState<string>("");
   const [authUser, setAuthUser] = useState<User | null>(null);
@@ -154,6 +168,7 @@ export default function App() {
   const [evaluationBackScreen, setEvaluationBackScreen] = useState<"chat" | "profile">("chat");
 
   useEffect(() => {
+    // Keep app auth/profile state synchronized with Firebase Auth + Firestore.
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setAuthUser(user);
       setIsAuthReady(true);
@@ -208,6 +223,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Stream recent case history for the authenticated user.
     if (!authUser) return;
 
     const casesQuery = query(
@@ -245,6 +261,7 @@ export default function App() {
   }, [authUser]);
 
   const specialtyStats = useMemo(() => {
+    // Derive per-specialty counts and average scores for profile analytics.
     const bySpecialty = new Map<string, { cases: number; totalScore: number }>();
     for (const item of recentCases) {
       const current = bySpecialty.get(item.specialty) ?? { cases: 0, totalScore: 0 };
@@ -261,6 +278,7 @@ export default function App() {
   }, [recentCases]);
 
   const derivedTrainingStats = useMemo(() => {
+    // Compute dashboard stats from case history to avoid duplicating logic.
     const casesCompleted = recentCases.length;
     const totalMinutes = recentCases.reduce((sum, item) => sum + item.durationMinutes, 0);
     const totalHours = Number((totalMinutes / 60).toFixed(1));
@@ -273,6 +291,7 @@ export default function App() {
   }, [recentCases]);
 
   useEffect(() => {
+    // Reflect derived stats in local profile state and persist them to Firestore.
     if (!authUser) return;
 
     setProfile((prev) => {
@@ -344,6 +363,7 @@ export default function App() {
   };
 
   const handleCompleteCase = (payload: CompletedCasePayload) => {
+    // Cache latest evaluation for immediate UI navigation and persist server-side.
     setLatestEvaluation(payload);
     setEvaluationBackScreen("chat");
     setCurrentScreen("evaluation");

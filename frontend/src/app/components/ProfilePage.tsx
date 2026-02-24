@@ -1,3 +1,9 @@
+/**
+ * Profile dashboard displaying user stats, achievements, and case history.
+ *
+ * This component is presentation-focused and relies on parent-provided data and
+ * callbacks for navigation and side effects.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -43,6 +49,7 @@ export function ProfilePage({ onBack, onStartNewCase, onViewCase, onSignOut, pro
 
   const totalHistoryPages = Math.max(1, Math.ceil(recentCases.length / CASES_PER_PAGE));
   const pagedHistory = useMemo(() => {
+    // Client-side pagination for recent history cards.
     const start = (historyPage - 1) * CASES_PER_PAGE;
     return recentCases.slice(start, start + CASES_PER_PAGE);
   }, [historyPage, recentCases]);
@@ -52,6 +59,7 @@ export function ProfilePage({ onBack, onStartNewCase, onViewCase, onSignOut, pro
   }, [totalHistoryPages]);
 
   const profileData = profile ?? {
+    // Fallback prevents null checks throughout the UI.
     name: "Unknown User",
     email: "",
     photoURL: "",
