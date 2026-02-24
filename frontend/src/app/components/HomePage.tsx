@@ -26,7 +26,7 @@ export function HomePage({ onStartTraining, onSignIn, isSignedIn, profileName, p
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-semibold text-white">AI Attending</span>
+            <span className="text-xl font-semibold text-white">MentorMD</span>
           </div>
           <Button variant="outline" onClick={onSignIn} className="border-white text-white hover:bg-white/10 hover:text-white gap-2">
             {isSignedIn && profilePhotoURL ? (
@@ -43,7 +43,7 @@ export function HomePage({ onStartTraining, onSignIn, isSignedIn, profileName, p
       <main className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-5xl font-semibold text-foreground mb-6">
-            Practice Clinical Reasoning with Your AI Attending
+            Practice Clinical Reasoning with MentorMD, your AI Attending Physician
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
             Sharpen your diagnostic skills through realistic case simulations. Present cases, 

@@ -265,7 +265,7 @@ export function CaseScreen({ onBack, onSubmit }: CaseScreenProps) {
                 disabled={!presentation.trim()}
                 className="w-full bg-[#071C5A] hover:bg-[#0d2d8a] text-white shadow-lg"
               >
-                Submit to Attending
+                Submit to Attending Physician
               </Button>
             </Card>
           </div>
