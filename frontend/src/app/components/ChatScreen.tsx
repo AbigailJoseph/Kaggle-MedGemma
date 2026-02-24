@@ -132,6 +132,8 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
     setMetricsStatus((prev) => ({ ...prev, ...merged }));
   };
 
+  const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+
   const authedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const user = auth.currentUser;
     if (!user) {
@@ -143,7 +145,10 @@ export function ChatScreen({ initialPresentation, onBack, onComplete }: ChatScre
     if (!headers.has("Content-Type") && init?.body) {
       headers.set("Content-Type", "application/json");
     }
-    return fetch(input, { ...init, headers });
+    const url = typeof input === "string" && input.startsWith("/api/")
+      ? `${API_BASE}${input}`
+      : input;
+    return fetch(url, { ...init, headers });
   };
 
   // Scroll to the latest message whenever messages change

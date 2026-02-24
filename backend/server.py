@@ -9,6 +9,7 @@ Endpoints:
 Sessions are stored in memory and are lost when the server restarts.
 """
 
+import json
 import os
 import sys
 import uuid
@@ -38,9 +39,12 @@ app = FastAPI(title="MedGemma Clinical Tutor API")
 ENV_PATH = Path(__file__).resolve().with_name(".env")
 load_dotenv(dotenv_path=ENV_PATH)
 
+_default_origins = "http://localhost:5173,http://127.0.0.1:5173,https://abigailjoseph.github.io"
+_allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", _default_origins).split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -87,11 +91,16 @@ def _ensure_firebase_admin_initialized() -> None:
     if firebase_admin._apps:
         return
 
-    service_account_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
+    service_account_value = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
 
     try:
-        if service_account_path:
-            cred = credentials.Certificate(service_account_path)
+        if service_account_value and service_account_value.strip().startswith("{"):
+            # Value is raw JSON (useful on Render where file storage isn't persistent)
+            cred = credentials.Certificate(json.loads(service_account_value))
+            firebase_admin.initialize_app(cred)
+        elif service_account_value:
+            # Value is a file path
+            cred = credentials.Certificate(service_account_value)
             firebase_admin.initialize_app(cred)
         else:
             # Uses Application Default Credentials if available.

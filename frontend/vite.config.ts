@@ -4,6 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  // Set to repo name so asset paths are correct on GitHub Pages.
+  // In local dev (VITE_BASE_PATH unset) this defaults to '/' so the proxy still works.
+  base: process.env.VITE_BASE_PATH ?? '/',
+
   plugins: [
     // The React and Tailwind plugins are both required for Make, even if
     // Tailwind is not being actively used – do not remove them
