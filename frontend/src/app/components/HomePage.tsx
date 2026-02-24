@@ -1,0 +1,114 @@
+import { Button } from "./ui/button";
+import { Stethoscope, Brain, MessageSquare, TrendingUp } from "lucide-react";
+
+interface HomePageProps {
+  onStartTraining: () => void;
+  onSignIn: () => void;
+  isSignedIn: boolean;
+  profileName?: string;
+  profilePhotoURL?: string;
+}
+
+export function HomePage({ onStartTraining, onSignIn, isSignedIn, profileName, profilePhotoURL }: HomePageProps) {
+  const initials = (profileName ?? "User")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-[#071C5A] bg-[#071C5A]">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <Stethoscope className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-semibold text-white">MentorMD</span>
+          </div>
+          <Button variant="outline" onClick={onSignIn} className="border-white text-white hover:bg-white/10 hover:text-white gap-2">
+            {isSignedIn && profilePhotoURL ? (
+              <img src={profilePhotoURL} alt="Profile" referrerPolicy="no-referrer" className="w-6 h-6 rounded-full object-cover border border-white/60" />
+            ) : isSignedIn ? (
+              <span className="w-6 h-6 rounded-full bg-white/20 text-xs flex items-center justify-center">{initials}</span>
+            ) : null}
+            {isSignedIn ? "View Profile" : "Sign In"}
+          </Button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-5xl font-semibold text-foreground mb-6">
+            Practice Clinical Reasoning with MentorMD, your AI Attending Physician
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+            Sharpen your diagnostic skills through realistic case simulations. Present cases, 
+            defend your diagnoses, and receive expert feedback in a safe, structured learning environment.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button 
+              onClick={onStartTraining}
+              className="bg-[#071C5A] hover:bg-[#0d2d8a] text-white px-8 py-6 text-lg shadow-lg"
+            >
+              Start Training
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onSignIn}
+              className="px-8 py-6 text-lg border-2 border-[#071C5A] text-[#071C5A] hover:bg-[#071C5A]/5"
+            >
+              {isSignedIn ? "View Profile" : "Sign In"}
+            </Button>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-20">
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-800 flex items-center justify-center mb-4 shadow">
+              <Stethoscope className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-slate-900">1. Review the Case</h3>
+            <p className="text-slate-700 text-sm">
+              Examine patient vitals, symptoms, labs, and history in a structured format.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center mb-4 shadow">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-slate-900">2. Present Your Diagnosis</h3>
+            <p className="text-slate-700 text-sm">
+              Submit your structured presentation, differential, and management plan.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center mb-4 shadow">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-slate-900">3. Receive Feedback</h3>
+            <p className="text-slate-700 text-sm">
+              Engage with Socratic questions and expert guidance to deepen your reasoning.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4 shadow">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-slate-900">4. Track Progress</h3>
+            <p className="text-slate-700 text-sm">
+              Get detailed evaluations and monitor your clinical reasoning improvement.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
