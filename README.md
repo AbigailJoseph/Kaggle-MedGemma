@@ -27,6 +27,27 @@ Deployed website: https://abigailjoseph.github.io/Kaggle-MedGemma/
 
 Create `backend/.env` and `frontend/.env`, then run in two terminals:
 
+### Environment Variables
+
+Backend (`backend/.env`)
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `MEDGEMMA_PROJECT_ID`
+- `MEDGEMMA_ENDPOINT_ID`
+- `FIREBASE_SERVICE_ACCOUNT_KEY`
+- `GOOGLE_APPLICATION_CREDENTIALS` (optional, depends on GCP auth setup)
+- `ALLOWED_ORIGINS`
+
+Frontend (`frontend/.env`)
+- `VITE_API_BASE_URL`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID`
+
 ### 1. Run Backend
 
 ```bash
@@ -62,8 +83,6 @@ npm run dev
 |-- medgemma_client.py                        # Legacy standalone MedGemma test client script
 |-- docs/
 |   |-- system-diagram.png                    # High-level system diagram image
-|   `-- system-diagram/
-|       `-- README.md                         # Diagram explanation and data-flow notes
 |-- backend/
 |   |-- main.py                               # CLI entrypoint for local tutoring session
 |   |-- server.py                             # FastAPI API (start session, message, finalize)
@@ -103,14 +122,15 @@ npm run dev
 
 ## System Diagram
 
-- Diagram image: `docs/system-diagram.png`
-- Detailed walkthrough: `docs/system-diagram/README.md`
+![MentorMD System Diagram](docs/system-diagram.png)
 
 ## High-Level Flow
 
-1. Frontend authenticates with Firebase and starts a backend session.
-2. Backend parses presentation text and updates Bayes evidence.
-3. Backend calls MedGemma with grounded prompt context.
-4. Backend evaluates the student presentation using the 9-metric rubric.
-5. AI attending returns concise feedback plus targeted follow-up.
-6. Frontend saves final case results/transcript to Firestore.
+1. User signs in on the frontend via Firebase Auth.
+2. Frontend sends authenticated requests to backend session endpoints.
+3. Backend parses student input into structured symptoms and diagnoses.
+4. Bayes engine computes grounded differential probabilities.
+5. Backend builds a MedGemma prompt packet using case context and Bayes summary.
+6. Evaluation workflow grades the presentation across 9 metrics and identifies gaps.
+7. AI attending returns concise coaching and one targeted Socratic question.
+8. Final case performance and transcript are persisted in Firestore and shown in profile analytics.
