@@ -84,7 +84,7 @@ def build_bayes_summary(
 def build_medgemma_prompt(bayes_summary: Dict[str, Any]) -> str:
     """Create the grounded MedGemma prompt using case narrative and Bayes outputs."""
     return f"""
-You are MedGemma. Create a concise, structured teaching brief using ONLY the provided information.
+Create a concise, structured teaching brief using ONLY the provided information.
 Do NOT invent patient facts. If something is missing, say it is missing.
 
 CASE_NARRATIVE (fixed case background context for this scenario):
