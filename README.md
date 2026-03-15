@@ -1,54 +1,44 @@
 # MentorMD: An AI Attending Physician
 
-MentorMD is an AI attending physician platform for clinical case-presentation training.
+MentorMD is an AI attending physician that helps medical students practice clinical reasoning by analyzing case presentations, evaluating diagnostic thinking, and guiding learners with targeted Socratic feedback.
 
-It takes a student's presentation, evaluates it against a 9-metric rubric, asks targeted Socratic follow-up questions, and tracks improvement across turns while storing user progress in Firebase.
+### Live Demo: TODO
 
-## Live Demo
+### Team Members
+- Katie Xiao: Full-Stack Development (Backend, Firebase, Frontend)
+- Parvi Chadha: AI Agent Design & Prompt Engineering
+- Abigail Joseph: Frontend Development & System Integration
+- Caleb Kim: Bayesian Network & Backend Prompt Engineering
 
-Deployed website: https://abigailjoseph.github.io/Kaggle-MedGemma/
-
-## Tech Stack
-
-### Frontend
-- React + TypeScript + Vite
-- Firebase Auth (Google sign-in)
-- Cloud Firestore (profiles, completed cases, stats)
-
-### Backend
-- Python 3.10+
-- FastAPI + Uvicorn
-- OpenAI API (student parser, rubric evaluator, AI attending)
-- Google Vertex AI endpoint (MedGemma prompt packet)
-- Firebase Admin SDK (ID token verification)
-- Custom Noisy-OR Bayes network for differential reasoning
+---
 
 ## Quick Start (Local Development)
 
-Create `backend/.env` and `frontend/.env`, then run in two terminals:
+### 1. Configure environment variables
 
-### Environment Variables
+`backend/.env`
 
-Backend (`backend/.env`)
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-- `MEDGEMMA_PROJECT_ID`
-- `MEDGEMMA_ENDPOINT_ID`
-- `FIREBASE_SERVICE_ACCOUNT_KEY`
-- `GOOGLE_APPLICATION_CREDENTIALS` (optional, depends on GCP auth setup)
-- `ALLOWED_ORIGINS`
+```env
+OPENAI_API_KEY=your_openai_api_key
+FIREBASE_SERVICE_ACCOUNT_KEY=your_firebase_service_account_key
+```
 
-Frontend (`frontend/.env`)
-- `VITE_API_BASE_URL`
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-- `VITE_FIREBASE_MEASUREMENT_ID`
+`frontend/.env`
 
-### 1. Run Backend
+```env
+VITE_FIREBASE_API_KEY=your_firebase_web_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=1234567890
+VITE_FIREBASE_APP_ID=1:1234567890:web:abcdef1234567890
+VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Corresponding example env files can be found in `backend/.env.example` and `frontend/.env.example`.
+
+### 2. Run backend 
 
 ```bash
 cd backend
@@ -56,7 +46,7 @@ pip install -r requirements.txt
 uvicorn server:app --reload --port 8000
 ```
 
-### 2. Run Frontend
+### 3. Run frontend
 
 ```bash
 cd frontend
@@ -64,73 +54,91 @@ npm install
 npm run dev
 ```
 
-## What The System Does
+---
 
-- Accepts a student's initial case presentation.
-- Extracts likely symptoms/diagnoses from free text.
-- Uses a Noisy-OR Bayes network to ground the differential.
-- Generates a MedGemma knowledge packet from grounded context.
-- Evaluates presentation quality across 9 clinical communication/reasoning metrics.
-- Produces attending-style coaching plus one targeted question per turn.
-- Stores case outcomes, transcript, and profile stats for longitudinal learning.
-
-## Repository Structure 
-
+## Project Structure
 ```text
-.
-|-- README.md                                 
-|-- render.yaml                               
-|-- medgemma_client.py                        # Legacy standalone MedGemma test client script
-|-- docs/
-|   |-- system-diagram.png                    # High-level system diagram image
+Kaggle-MedGemma/
 |-- backend/
-|   |-- main.py                               # CLI entrypoint for local tutoring session
-|   |-- server.py                             # FastAPI API (start session, message, finalize)
-|   |-- requirements.txt                      # Python dependencies
-|   |-- medgemma_client.py                    # Backend MedGemma Vertex endpoint wrapper
+|   |-- server.py                         # FastAPI server entrypoint + session API
+|   |-- main.py                           # Local CLI tutoring entrypoint
+|   |-- medgemma_client.py                # OpenAI-backed teaching brief helper
 |   |-- agents/
-|   |   `-- ai_attending.py                   # Attending-style coaching response generator
-|   |-- parsing/
-|   |   `-- student_parser.py                 # Extracts symptoms/differential from student text
-|   |-- pipeline/
-|   |   |-- pipeline.py                       # Main orchestration: parse -> infer -> evaluate -> respond
-|   |   `-- state.py                          # Conversation state dataclass across turns
+|   |   `-- ai_attending.py               # Attending response agent
+|   |-- bayes/
+|   |   |-- noisy_or_bayesnet.py          # Noisy-OR Bayesian inference engine
+|   |   |-- network_data.py               # Disease/symptom network definitions
+|   |   |-- demo.py
+|   |   `-- data/
 |   |-- evaluation/
-|   |   |-- presentation_workflow.py          # 9-metric rubric evaluation + Socratic question loop
-|   |   `-- diagnosis_evaluator.py            # Checks diagnosis support against Bayes outputs
-|   `-- bayes/
-|       |-- noisy_or_bayesnet.py              # Noisy-OR Bayesian inference engine
-|       |-- network_data.py                   # Disease/symptom priors and conditional probabilities
-|       |-- demo.py                           # Bayes demo script
-|       `-- data/sample_ehr.json              # Sample data for experimentation
-`-- frontend/
-    |-- README.md                             # Frontend-specific setup details
-    |-- package.json                          # Node scripts/dependencies
-    |-- vite.config.ts                        # Vite build/dev config
-    |-- index.html                            # Frontend HTML entry
-    `-- src/
-        |-- main.tsx                          # React mount point
-        |-- lib/firebase.ts                   # Firebase client initialization
-        |-- app/App.tsx                       # App shell, screen flow, auth + Firestore orchestration
-        |-- app/components/HomePage.tsx       # Landing page
-        |-- app/components/CaseScreen.tsx     # Initial case presentation input
-        |-- app/components/ChatScreen.tsx     # Interactive tutoring chat UI
-        |-- app/components/EvaluationPage.tsx # Final feedback/results page
-        |-- app/components/ProfilePage.tsx    # User profile, history, progress dashboard
-        `-- app/components/ui/*               # Reusable UI primitives (presentational components)
+|   |   |-- presentation_workflow.py      # 9-metric rubric evaluation + question generation
+|   |   `-- diagnosis_evaluator.py        # Differential support checks
+|   |-- parsing/
+|   |   `-- student_parser.py             # Free-text to structured clinical features
+|   `-- pipeline/
+|       |-- pipeline.py                   # Main orchestration: parse -> infer -> evaluate -> respond
+|       `-- state.py                      # Conversation state model
+|-- frontend/
+|   `-- src/
+|       |-- main.tsx                      # React entrypoint
+|       |-- lib/
+|       |   `-- firebase.ts               # Firebase client initialization
+|       `-- app/
+|           |-- App.tsx                   
+|           `-- components/
+|-- docs/
+|   `-- system-diagram.png
+`-- README.md
 ```
 
+---
+
 ## System Diagram
+![System Diagram](docs/system-diagram.png)
 
-![MentorMD System Diagram](docs/system-diagram.png)
+### Frontend 
+The frontend, provides an interactive tutoring interface where students present cases and receive attending-style feedback. **Firebase Authentication** handles secure login via Google, and **Cloud Firestore** stores completed cases and the learner’s progress over time. The platform also includes **streaks, achievements, and other progress metrics** to incentivize consistent practice and directly track the student’s improvement in their clinical reasoning skills. 
 
-## High-Level Flow
+### Backend
+The backend runs a stateful clinical reasoning pipeline for each tutoring session.
 
-1. User signs in on the frontend via Firebase Auth.
-2. Frontend sends authenticated requests to backend session endpoints.
-3. Backend parses student input into structured symptoms and diagnoses.
-4. Bayes engine computes grounded differential probabilities.
-5. Backend builds a MedGemma prompt packet using case context and Bayes summary.
-6. Evaluation workflow grades the presentation across 9 metrics and identifies gaps.
-7. AI attending returns concise coaching and one targeted Socratic question.
-8. Final case performance and transcript are persisted in Firestore and shown in profile analytics.
+When a student submits a case presentation, the backend works as follows:
+1. An OpenAI model converts the student’s narrative into a **structured representation**, extracting normalized symptoms, absent findings, and proposed diagnoses aligned to a clinical ontology.
+2. These observations update a **Noisy-OR Bayesian network**, which computes posterior probabilities across candidate pulmonary diseases and produces a ranked differential diagnosis. 
+3. The student’s presentation is graded across **nine clinical reasoning competencies** allowing the system to identify missing or incomplete reasoning steps. 
+4. An AI attending agent (also powered by an OpenAI model), generates concise coaching and asks **one Socratic follow-up question** that targets the student’s weakest reasoning area. 
+
+Each interaction updates the tutoring pipeline state, which is serialized and stored in a backend **SQLite session database** to allow conversations to resume deterministically. 
+
+---
+
+## Technical Details 
+
+### Tech Stack
+
+Frontend:
+- React
+- TypeScript
+- Vite
+- Firebase Authentication
+- Cloud Firestore
+
+Backend:
+- Python
+- FastAPI
+- OpenAI API
+- SQLite
+- Noisy-OR Bayesian Networks
+
+### Evaluation Rubric 
+
+MentorMD evaluates case presentations across:
+1. Focused relevant information selection
+2. Clear working diagnosis statement
+3. Logical organization and reasoning
+4. Prioritized differential diagnosis
+5. Conciseness and efficient delivery
+6. Rational diagnostic workup prioritization
+7. Management plan and disposition prioritization
+8. Hypothesis-driven inquiry
+9. Ability to synthesize findings
